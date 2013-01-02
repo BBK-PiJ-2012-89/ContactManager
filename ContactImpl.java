@@ -4,15 +4,16 @@
 * Contacts have an ID (unique), a name (probably uniques, but maybe
 * not), and notes that the user may want to save about them.
 */
-public class ContactImpl{
+public class ContactImpl implements Contact{
 
 	private int iD;
 	private String name;
 	private String notes;
 
-	public ContactImpl(int iD, String name){
-		this.iD = iD;
+	public ContactImpl(int iD, String name, String notes){
 		this.name = name;
+		this.iD = iD;
+		this.notes = notes;
 	}
 
 	public int getId(){
@@ -29,12 +30,9 @@ public class ContactImpl{
 	}
 
 	public void addNotes(String note){
-		if(notes.equals(null)){
-			notes = note;
 
-		} else {
+		notes += note;
+		//When adding notes, I should probably include the date and time they were written
 
-			notes += note;
-		}
 	}
 }

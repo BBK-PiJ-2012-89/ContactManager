@@ -1,5 +1,6 @@
 import java.util.Calendar;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -10,12 +11,12 @@ public class ContactManagerImpl{
 
 	private int contactID;
 	private int meetingID;
-	private Set<Contact> contactSet = null;
-	private Calendar theCalendar
+	private List<Contact> contactList = null;
+	private List<Meeting> meetingList = null;
+	private Calendar theCalendar;
 
 	public ContactManagerImpl(){
-		theCalendar = new Calendar();
-		iDSetter = 0;
+		contactList = new ArrayList<Contact>();
 	}
 
 	/**
@@ -29,18 +30,15 @@ public class ContactManagerImpl{
 	*/
 	public int addFutureMeeting(Set<Contact> contacts, Calendar date){
 
-		if(date.getTime() < theCalendar.getTime){
-			throw(IllegalArgumentException ex){
-				system.out.println("Please enter a future date");
-				ex.printStackTrace();
-			}
+		if((date.getTime()).before(theCalendar.getTime())){
+			throw new IllegalArgumentException();
 		}
 
-		FutureMeeting newFuture = new FutureMeeting(meetingID, date, contacts);
+		MeetingImpl newFuture = new FutureMeetingImpl(meetingID, date, contacts);
 
 		meetingID++;
 
-		return newFuture.getId();
+		return newFuture.getID();
 	}
 
 	/**
@@ -50,9 +48,7 @@ public class ContactManagerImpl{
 	* @return the meeting with the requested ID, or null if there is none
 	* @throws IllegalArgumentException if there is a meeting with that ID already happening in the future
 	*/
-	public PastMeeting getPastMeeting(int id){
-
-	}
+	//public PastMeeting getPastMeeting(int id){}
 
 	/**
 	* Returns the FUTURE meeting with the requested ID, or null if not exists
@@ -151,7 +147,7 @@ public class ContactManagerImpl{
 
 		try{
 
-			newContact = new ContactImpl(iDSetter, name, notes);
+			newContact = new ContactImpl(contactID, name, notes);
 		} 
 		catch (NullPointerException ex){
 
@@ -159,13 +155,9 @@ public class ContactManagerImpl{
 			ex.printStackTrace();
 		}
 
-		if(iDSetter == 0){
-			contactSet = new HashSet(); //If this is the first contact added, a new set is created to store it and future contacts
-		}
+		contactList.add(newContact);
 
-		contactSet.add(newContact);
-
-		iDSetter++;
+		contactID++;
 	}
 
 	/**

@@ -3,7 +3,7 @@
 *
 *It includes your notes about what happened and what was agreed.
 */
-public class PastMeetingImpl implements Meeting {
+public class PastMeetingImpl extends MeetingImpl implements Meeting {
 	/**
 	* Returns the notes from the previous meeting.
 	*

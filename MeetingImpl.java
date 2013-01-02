@@ -6,13 +6,13 @@ import java.util.Set;
 *
 * Meetings have unique IDs, scheduled date and a list of participating contacts
 */
-public class Meeting{
+public class MeetingImpl implements Meeting{
 
 	private int iD;
 	private Calendar date;
 	private Set<Contact> attendees;
 
-	public Meeting(int iD, Calendar date, Set<Contact> attendees){
+	public MeetingImpl(int iD, Calendar date, Set<Contact> attendees){
 		this.iD = iD;
 		this.date = date;
 	}

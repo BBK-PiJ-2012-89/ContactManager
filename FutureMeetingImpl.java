@@ -1,7 +1,11 @@
+import java.util.Set;
+import java.util.Calendar;
 /**
 * A meeting to be held in the future
 */
-public class FutureMeetingImpl implements FutureMeeting{
-	// No methods here, this is just a naming interface
-	//(i.e. only necessary for type checking and/or downcasting)
+public class FutureMeetingImpl extends MeetingImpl implements FutureMeeting {
+	
+	public FutureMeetingImpl(int iD, Calendar date, Set<Contact> attendees){
+		super(iD, date, attendees);
+	}
 }
