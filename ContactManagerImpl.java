@@ -28,9 +28,20 @@ public class ContactManagerImpl{
 
 		MeetingImpl newFuture = new FutureMeetingImpl(meetingID, date, contacts);
 
+		addMeetingtoContacts(contacts, newFuture);
+
 		meetingID++;
 
 		return newFuture.getID();
+	}
+
+	private void addMeetingtoContacts(Set<ContactImpl> contacts, MeetingImpl newMeeting){
+
+		ContactImpl[] theContacts = contacts.toArray(new ContactImpl[0]);
+
+		for(int i = 0; i < theContacts.length; i++){
+			theContacts[i].addMeetings(newMeeting);
+		}
 	}
 
 
@@ -55,7 +66,7 @@ public class ContactManagerImpl{
 		return returner;
 	}
 
-	public MeetingImpl getMeeting(int id){
+	private MeetingImpl getMeeting(int id){
 
 		MeetingImpl isMeetingNull = null;
 
@@ -77,7 +88,6 @@ public class ContactManagerImpl{
 		}
 
 		return isMeetingNull;
-
 	}
 
 	/**
@@ -91,22 +101,42 @@ public class ContactManagerImpl{
 	* @return the list of future meetings scheduled with this contact
 	* @throws IllegalArgumentException if the contac does not exist
 	*/
-	//public List<Meeting> getFutureMeetingList(Contact contact){}
+	public List<FutureMeetingImpl> getFutureMeetingList(ContactImpl contact){
 
-	public List<Meeting> getMeeting(Contact contact){
-		List<Meeting> contactMeetings = null;
+		List<MeetingImpl> futureMeetings = getMeetings(contact);
+		List<FutureMeetingImpl> futureReturn;
 
-		if(meetingList != null){
 
-			for(int i = 0; i < meetingList.size(); i++){
-
-				if(meetingList.get(i).getName)
-
+		if(futureMeetings != null){
+			for(int i = 0; i < futureMeetings.size(); i++){
+				if(futureMeetings.get(i).getDate().getTime().before(theCalendar.getTime())){
+					futureMeetings.remove(i);
+				}
 			}
-
-		} else {
-			return contactMeetings
 		}
+
+		if(futureMeetings.isEmpty()){
+			return null;
+		} else {
+			
+			for(int i = 0; i < futureMeetings.size(); i ++){
+				FutureMeetingImpl holder  = (FutureMeetingImpl) futureMeetings.get(i);
+				futureReturn.add(holder);
+			}
+			return futureReturn;
+
+		}
+	}
+
+	public List<MeetingImpl> getMeetings(ContactImpl contact){
+		List<MeetingImpl> contactMeetings = null;
+
+		if(contactMeetings != null){
+
+			contactMeetings = contact.getMeetings();
+		}
+
+		return contactMeetings;
 	}
 
 	/**
@@ -133,7 +163,29 @@ public class ContactManagerImpl{
 	* @return the list of future meeitngs sceduled with the contact (maybe empty)
 	* @throws IllegalArgumentException if the contact does not exist
 	*/
-	//public List<PastMeeting> getPastMeetingList(Contact contact){}
+	public List<PastMeetingImpl> getPastMeetingList(ContactImpl contact){
+		List<MeetingImpl> pastMeetings = getMeetings(contact);
+		List<PastMeetingImpl> pastReturn = null;
+
+		if(pastMeetings != null){
+			for(int i = 0; i < pastMeetings.size(); i++){
+				if(pastMeetings.get(i).getDate().getTime().after(theCalendar.getTime())){
+					pastMeetings.remove(i);
+				}
+			}
+		}
+
+		if(pastMeetings.isEmpty()){
+			return null;
+		} else {
+			for(int i = 0; i < pastMeetings.size(); i ++){
+				PastMeetingImpl holder  = (PastMeetingImpl) pastMeetings.get(i);
+				pastReturn.add(holder);
+			}
+		}
+
+		return pastReturn;
+	}
 
 	/**
 	* Create a new record for a meeting that took place in the past
