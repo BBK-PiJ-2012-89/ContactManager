@@ -1,14 +1,12 @@
-/**
-* A contact is a person we are making business with or may do in the future
-*
-* Contacts have an ID (unique), a name (probably uniques, but maybe
-* not), and notes that the user may want to save about them.
-*/
+import java.util.List;
+import java.util.ArrayList;
+
 public class ContactImpl implements Contact{
 
 	private int iD;
 	private String name;
 	private String notes;
+	private List<MeetingImpl> meetings;
 
 	public ContactImpl(int iD, String name, String notes){
 		this.name = name;
@@ -27,6 +25,19 @@ public class ContactImpl implements Contact{
 
 	public String getNotes(){
 		return notes;
+	}
+
+	public void addMeetings(MeetingImpl newMeetings){
+
+		if(meetings == null){
+			meetings = new ArrayList<MeetingImpl>();
+		}
+
+		meetings.add(newMeetings);
+	}
+
+	public List<MeetingImpl> getMeetings(){
+		return meetings;
 	}
 
 	public void addNotes(String note){

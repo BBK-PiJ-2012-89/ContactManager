@@ -1,5 +1,6 @@
 import java.util.Calendar;
 import java.util.Set;
+import java.util.List;
 
 /**
 * A class to represent meetings
@@ -12,15 +13,15 @@ public class MeetingImpl implements Meeting{
 	private Calendar date;
 	private Set<Contact> attendees;
 
-	public MeetingImpl(int iD, Calendar date, Set<Contact> attendees){
+	public MeetingImpl(int iD, Calendar date, Set<ContactImpl> attendees){
 		this.iD = iD;
 		this.date = date;
+
 	}
 
 	public int getID(){
 		return iD;
 	}
-
 
 	public Calendar getDate(){
 		return date;
