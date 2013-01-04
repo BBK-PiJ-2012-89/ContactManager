@@ -11,28 +11,19 @@ public class ContactManagerImpl{
 
 	private int contactID = 0;
 	private int meetingID = 0;
-	private List<Contact> contactList = null;
-	private List<Meeting> meetingList = null;
+	private List<ContactImpl> contactList = null;
+	private List<MeetingImpl> meetingList = null;
 	private Calendar theCalendar;
 
 	public ContactManagerImpl(){
-		contactList = new ArrayList<Contact>();
 	}
 
-	/**
-	* Add a new meeting to be held in the future.
-	*
-	* @param contacts a list of contacts that will participate in the meeting
-	* @param date the date on which the meeting will take place
-	* @return the ID for the meeting
-	* @throws IllegalArgumentException if the meeting is set for a time in the past,
-	*		  or if any contact is unknown/non-existent
-	*/
-	public int addFutureMeeting(Set<Contact> contacts, Calendar date){
 
-		if((date.getTime()).before(theCalendar.getTime())){
+	public int addFutureMeeting(Set<ContactImpl> contacts, Calendar date){
 
-			throw new IllegalArgumentException();
+		if(date.getTime().before(theCalendar.getTime())){
+
+			throw new IllegalArgumentException("The time entered was in the past!");
 		}
 
 		MeetingImpl newFuture = new FutureMeetingImpl(meetingID, date, contacts);
@@ -42,16 +33,31 @@ public class ContactManagerImpl{
 		return newFuture.getID();
 	}
 
-	/**
-	*Returns the past meeting with the requested ID, or null if the ID does not exist
-	*
-	* @param id the ID for the meeting
-	* @return the meeting with the requested ID, or null if there is none
-	* @throws IllegalArgumentException if there is a meeting with that ID already happening in the future
-	*/
-	public PastMeeting getPastMeeting(int id){
 
-		PastMeeting isMeetingNull = null;
+	public PastMeetingImpl getPastMeeting(int id){
+
+		PastMeetingImpl  returner = (PastMeetingImpl) getMeeting(id);
+
+		if(returner.getDate().getTime().after(theCalendar.getTime())){
+			throw new IllegalArgumentException("The meeting corresponding to the ID that you entered has not yet occurred.");
+		}
+		return returner;
+	}
+
+
+	public FutureMeetingImpl getFutureMeeting(int id){
+
+		FutureMeetingImpl  returner = (FutureMeetingImpl) getMeeting(id);
+
+		if(returner.getDate().getTime().before(theCalendar.getTime())){
+			throw new IllegalArgumentException("The meeting corresponding to the ID that you entered has not yet occurred.");
+		}
+		return returner;
+	}
+
+	public MeetingImpl getMeeting(int id){
+
+		MeetingImpl isMeetingNull = null;
 
 		for(int i = 0; i < meetingList.size(); i++){
 
@@ -63,7 +69,7 @@ public class ContactManagerImpl{
 
 				} else {
 
-					PastMeeting returner = (PastMeeting) meetingList.get(i);
+					MeetingImpl returner = meetingList.get(i);
 
 					return returner;
 				}
@@ -71,30 +77,14 @@ public class ContactManagerImpl{
 		}
 
 		return isMeetingNull;
+
 	}
-
-	/**
-	* Returns the FUTURE meeting with the requested ID, or null if not exists
-	*
-	* @param id the ID for the meeting
-	* @return the meeting with the requested ID, or null if not exists
-	* @throws IllegalArgumentException if there is a meeting with that ID happening in the past
-	*/
-	//public FutureMeeting getFutureMeeting(int id){}
-
-	/**
-	* Returns the meeting with the requested ID, or null if not exists
-	*
-	* @param id the ID for the meeting
-	* @return the meeting with the requested ID, or null if not exists
-	*/
-	//public Meeting getMeeting(int id){}
 
 	/**
 	* Returns the list of future meetings scheduled with this contact
 	*
 	* If there are none, the list will be returned empty. Otherwise,
-	* the list whill be chronologicall sorted and will not contain 
+	* the list will be chronologicaly sorted and will not contain 
 	* any duplicates.
 	*
 	* @param contact one of the users contacts
@@ -102,6 +92,22 @@ public class ContactManagerImpl{
 	* @throws IllegalArgumentException if the contac does not exist
 	*/
 	//public List<Meeting> getFutureMeetingList(Contact contact){}
+
+	public List<Meeting> getMeeting(Contact contact){
+		List<Meeting> contactMeetings = null;
+
+		if(meetingList != null){
+
+			for(int i = 0; i < meetingList.size(); i++){
+
+				if(meetingList.get(i).getName)
+
+			}
+
+		} else {
+			return contactMeetings
+		}
+	}
 
 	/**
 	* Returns the list of future meetings scheduled for, or that took 
