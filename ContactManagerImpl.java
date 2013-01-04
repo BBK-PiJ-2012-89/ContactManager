@@ -9,8 +9,8 @@ import java.util.HashSet;
 */
 public class ContactManagerImpl{
 
-	private int contactID;
-	private int meetingID;
+	private int contactID = 0;
+	private int meetingID = 0;
 	private List<Contact> contactList = null;
 	private List<Meeting> meetingList = null;
 	private Calendar theCalendar;
@@ -31,6 +31,7 @@ public class ContactManagerImpl{
 	public int addFutureMeeting(Set<Contact> contacts, Calendar date){
 
 		if((date.getTime()).before(theCalendar.getTime())){
+
 			throw new IllegalArgumentException();
 		}
 
@@ -48,7 +49,29 @@ public class ContactManagerImpl{
 	* @return the meeting with the requested ID, or null if there is none
 	* @throws IllegalArgumentException if there is a meeting with that ID already happening in the future
 	*/
-	//public PastMeeting getPastMeeting(int id){}
+	public PastMeeting getPastMeeting(int id){
+
+		PastMeeting isMeetingNull = null;
+
+		for(int i = 0; i < meetingList.size(); i++){
+
+			if(meetingList.get(i).getID() == id){
+
+				if((meetingList.get(i).getDate().getTime()).before(theCalendar.getTime())){
+
+					throw new IllegalArgumentException();
+
+				} else {
+
+					PastMeeting returner = (PastMeeting) meetingList.get(i);
+
+					return returner;
+				}
+			}
+		}
+
+		return isMeetingNull;
+	}
 
 	/**
 	* Returns the FUTURE meeting with the requested ID, or null if not exists
