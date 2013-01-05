@@ -3,19 +3,57 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.GregorianCalendar;
 
-/**
-* A class to manage your contacts and meetings.
-*/
+
 public class ContactManagerImpl{
 
 	private int contactID = 0;
 	private int meetingID = 0;
+	private Set<ContactImpl> tempContactIDs = null;
 	private List<ContactImpl> contactList = null;
 	private List<MeetingImpl> meetingList = null;
-	private Calendar theCalendar;
+	private Calendar theCalendar = new GregorianCalendar();
 
 	public ContactManagerImpl(){
+	}
+
+	public void makeMeeting(){
+		Set<ContactImpl> contacts;
+		int contactNumber = 0;
+		String str = null;
+		while(str != "F"){
+			boolean contactExists = false;
+			System.out.println("You have selected add new meeting, begin by entering, one by one, the names contacts who will attend the meeting, when you are finished, type F: ");
+			str = System.console().readLine();
+			for(int i = 0; i < contactList.size(); i++){
+				if(contactList.get(i).getName().equals(str)){
+					contacts.add(contactList.get(i));
+					System.out.println("Thank you, " + str + " has been added to the Meeting.");
+					contactNumber++;
+					contactExists = true;
+				}
+			}
+			if(contactExists == false){
+				System.out.println("I'm sorry but the contact "+ str + ", does not appear to be in our database, please check the name and try again or return to the home screen to enter a new contact.")
+			}
+			//here there should be info to find whether the contact exists and if so add it to the set "contacts".
+		}
+
+		System.out.print("Now please enter the year of the meeting: ");
+		String dateString = System.console().readLine();
+		int year = Integer.parseInt(dateString);
+
+		System.out.print("Now please enter the month of the meeting: ");
+		String dateString = System.console().readLine();
+		int month = Integer.parseInt(dateString);
+
+		System.out.print("Now please enter the day of the meeting: ");
+		String dateString = System.console().readLine();
+		int day = Integer.parseInt(dateString);
+
+		Calendar date = Calendar.set(year, month, day);
+		addFutureMeeting(contacts, date);
 	}
 
 
@@ -90,21 +128,18 @@ public class ContactManagerImpl{
 		return isMeetingNull;
 	}
 
-	/**
-	* Returns the list of future meetings scheduled with this contact
-	*
-	* If there are none, the list will be returned empty. Otherwise,
-	* the list will be chronologicaly sorted and will not contain 
-	* any duplicates.
-	*
-	* @param contact one of the users contacts
-	* @return the list of future meetings scheduled with this contact
-	* @throws IllegalArgumentException if the contac does not exist
-	*/
 	public List<FutureMeetingImpl> getFutureMeetingList(ContactImpl contact){
+		List<MeetingImpl> futureMeetings = null;
 
-		List<MeetingImpl> futureMeetings = getMeetings(contact);
-		List<FutureMeetingImpl> futureReturn;
+		try{
+			futureMeetings = getMeetings(contact);
+		} 
+		catch (IllegalArgumentException ex){
+			System.out.println("That contact does not exist!");
+			ex.printStackTrace();
+		}
+
+		List<FutureMeetingImpl> futureReturn = null;
 
 
 		if(futureMeetings != null){
@@ -118,7 +153,7 @@ public class ContactManagerImpl{
 		if(futureMeetings.isEmpty()){
 			return null;
 		} else {
-			
+
 			for(int i = 0; i < futureMeetings.size(); i ++){
 				FutureMeetingImpl holder  = (FutureMeetingImpl) futureMeetings.get(i);
 				futureReturn.add(holder);
@@ -226,18 +261,21 @@ public class ContactManagerImpl{
 
 		ContactImpl newContact = null;
 
+		if(contactList == null){
+			contactList = new ArrayList<ContactImpl>();
+		}
+
 		try{
 
 			newContact = new ContactImpl(contactID, name, notes);
+
+			contactList.add(newContact);
 		} 
 		catch (NullPointerException ex){
 
 			System.out.println("Looks like you forgot to enter one of the values, please try again. ");
 			ex.printStackTrace();
 		}
-
-		contactList.add(newContact);
-
 		contactID++;
 	}
 
@@ -248,7 +286,21 @@ public class ContactManagerImpl{
 	* @return a list containing the contacts that correspond to the IDs.
 	* @throws IllegalArgumentException if any of the IDs does not correspond to a real contact
 	*/
-	//public Set<Contact> getContacts(int ids){}
+	public Set<ContactImpl> getContacts(int... ids){
+		Set<ContactImpl> returnContacts = new HashSet<ContactImpl>();
+
+		for(int id : ids){
+			ContactImpl contact = contactList.get(id);
+			if(contact == null){
+				throw new IllegalArgumentException("The contact id " + id + "does not exist.");
+			}
+
+			returnContacts.add(contact);
+		}
+
+		return returnContacts;
+
+	}
 
 	/**
 	* Returns a list with the contacts whose name contains that string.
