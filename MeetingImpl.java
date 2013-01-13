@@ -1,6 +1,5 @@
 import java.util.Calendar;
 import java.util.Set;
-import java.util.List;
 
 /**
 * A class to represent meetings

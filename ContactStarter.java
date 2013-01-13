@@ -1,18 +1,26 @@
-public class ContactStarter{
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
-    public static void main(String[] args) {
+public class ContactStarter {
+	
+	private ContactManagerImpl newContactManager = new ContactManagerImpl();
+	
+	public static void main(String[] args) {
         ContactStarter launcher = new ContactStarter();
         launcher.launch();
     }
 
     public void launch() {
-
+    	
     	welcome();
 
     }
 
 	public void welcome(){
-
+		
+		
+		String str = null;
 		int selection = 0;
 		
 
@@ -24,19 +32,21 @@ public class ContactStarter{
 		System.out.println("Enter 3 to access a past meeting");
 		System.out.println("Enter 4 to add meeting notes");
 		System.out.println("Enter 5 to access a future meeting");
+		System.out.println("Enter EXIT to exit the program");		
 		System.out.println("");
 
 		while(selection == 0){
-
-			String str = System.console().readLine();
-
-
+			
+			str = getInput();
+			
+			if(str.equals("EXIT")){
+				break;
+			}
 			try{
 				selection = Integer.parseInt(str);
 
 			} catch (NumberFormatException ex){
-				System.out.println("That was not an integer!");
-				ex.printStackTrace();
+				System.out.println("That was not an integer! Please try again.");
 			}
 			if(selection > 5 || selection < 1){
 				System.out.println("That was not an option, please try again.");
@@ -48,16 +58,15 @@ public class ContactStarter{
 	}
 
 	public void mainMenu(int a){
-		ContactManagerImpl newContactManager = new ContactManagerImpl();
 
 		if(a == 1){//Adds contact
 			System.out.print("You have selected add new Contact, begin by entering the contacts name or type  EXIT to return to the main menu: ");
-			String name = System.console().readLine();
+			String name = getInput();
 			if(name.equals("EXIT")){
 				welcome();
 			}
 			System.out.print("Now please enter any notes that you may have regarding the contact: ");
-			String notes = System.console().readLine();
+			String notes = getInput();
 
 			newContactManager.addNewContact(name, notes);
 
@@ -76,7 +85,7 @@ public class ContactStarter{
 
 		if(a == 3){ //accesses Past Meeting
 			System.out.println("You have selected access past meeting, begin by entering the contacts name or type EXIT to return to the main menu: ");
-			String str = System.console().readLine();
+			String str = getInput();
 			if(str.equals("EXIT")){
 				welcome();
 			}
@@ -85,7 +94,7 @@ public class ContactStarter{
 
 		if(a == 4){//adds meeting notes
 			System.out.println("You have selected add meeting notes, begin by entering the contacts name or type EXIT to return to the main menu: ");
-			String str = System.console().readLine();
+			String str = getInput();
 			if(str.equals("EXIT")){
 				welcome();
 			}
@@ -94,14 +103,27 @@ public class ContactStarter{
 
 		if(a == 5){//accesses future meeting
 			System.out.println("You have selected access Future Meeting, begin by entering the contacts name or type EXIT to return to the main menu: ");
-			String str = System.console().readLine();
+			//This method contain options to access by meeting or by date
+			String str = getInput();
 			if(str.equals("EXIT")){
 				welcome();
 			}
 		}
-
-
-
 	}
+	
+		public String getInput(){
+			String str = "";
+			try{
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+				str = bufferedReader.readLine();
+			} catch (IOException ex){
+				ex.printStackTrace();
+			}
+			return str;
+		}
 
+
+
+	
+	
 }

@@ -1,17 +1,23 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.GregorianCalendar;
+import java.text.SimpleDateFormat;
 
 
 public class ContactManagerImpl{
 
 	private int contactID = 0;
 	private int meetingID = 0;
-	private Set<ContactImpl> tempContactIDs = null;
-	private List<ContactImpl> contactList = null;
+	private List<ContactImpl> contactList = new ArrayList<ContactImpl>();;
 	private List<MeetingImpl> meetingList = null;
 	private Calendar theCalendar = new GregorianCalendar();
 
@@ -19,44 +25,78 @@ public class ContactManagerImpl{
 	}
 
 	public void makeMeeting(){
-		Set<ContactImpl> contacts;
-		int contactNumber = 0;
+		//this method needs a selector at the beginning 
+		
+		System.out.println("Is this a future meeting (FUTR), or has it already occured (PAST):");
+		String pastOrFuture = getInput();
+		boolean past;
+		if(pastOrFuture.equals("PAST")){
+			past = true;
+		} else {
+			past = false;
+		}
+		
+		Set<ContactImpl> contacts = null;
 		String str = null;
-		while(str != "F"){
+		boolean finished = false;
+		while(!finished){
 			boolean contactExists = false;
-			System.out.println("You have selected add new meeting, begin by entering, one by one, the names contacts who will attend the meeting, when you are finished, type F: ");
-			str = System.console().readLine();
-			for(int i = 0; i < contactList.size(); i++){
-				if(contactList.get(i).getName().equals(str)){
-					contacts.add(contactList.get(i));
-					System.out.println("Thank you, " + str + " has been added to the Meeting.");
-					contactNumber++;
-					contactExists = true;
+			System.out.println("Begin by entering, one by one, the names contacts who will attend the meeting, when you are finished, type DONE: ");
+			str = getInput();
+			try{
+				for(int i = 0; i < contactList.size(); i++){
+					if(contactList.get(i).getName().equals(str)){
+						if(contacts == null){
+							contacts = new HashSet<ContactImpl>();
+						}
+						contacts.add(contactList.get(i));
+						System.out.println("Thank you, " + str + " has been added to the Meeting.");
+						contactExists = true;
+					}
 				}
+			} catch (NullPointerException ex){
+				ex.printStackTrace();
+				System.out.println("You don't seem to have added any contacts yet!");
 			}
-			if(contactExists == false){
-				System.out.println("I'm sorry but the contact "+ str + ", does not appear to be in our database, please check the name and try again or return to the home screen to enter a new contact.")
+			if(str.equals("DONE")){
+				finished = true;
+			} else if(contactExists == false){
+				System.out.println("I'm sorry but the contact "+ str + ", does not appear to be in our database, please check the name and try again or return to the home screen to enter a new contact.");
 			}
-			//here there should be info to find whether the contact exists and if so add it to the set "contacts".
 		}
 
-		System.out.print("Now please enter the year of the meeting: ");
-		String dateString = System.console().readLine();
-		int year = Integer.parseInt(dateString);
-
-		System.out.print("Now please enter the month of the meeting: ");
-		String dateString = System.console().readLine();
-		int month = Integer.parseInt(dateString);
-
-		System.out.print("Now please enter the day of the meeting: ");
-		String dateString = System.console().readLine();
-		int day = Integer.parseInt(dateString);
-
-		Calendar date = Calendar.set(year, month, day);
-		addFutureMeeting(contacts, date);
+		Calendar calHolder = getDate();
+		if(!past){
+			int meetingID = addFutureMeeting(contacts, calHolder);
+		} else if(past){
+			System.out.println("Please now enter any additional notes you may have about this meeting.");
+			String notes = getInput();
+			addNewPastMeeting(contacts, calHolder, notes);
+		}
+		System.out.println("The meeting has been successfully entered, its meeting ID is " + meetingID);
 	}
-
-
+	
+	public Calendar getDate(){
+		System.out.print("Now please enter the date of the meeting (DD/MM/YYYY): ");
+		String dateString = getInput();
+		Calendar cal = Calendar.getInstance();
+	    DateFormat df = new SimpleDateFormat("dd/MM/yyyy"); 
+	    Date newDate;
+	    Calendar calHolder = Calendar.getInstance();;
+	    try {
+	        newDate = df.parse(dateString);
+	        cal.setTime(df.parse(dateString));
+	    	calHolder.setTime(newDate);
+	    } catch (ParseException e) {
+	        e.printStackTrace();
+	    }
+	    return calHolder;
+	}
+	
+	public List<ContactImpl> getContacts(){
+		return contactList;
+	}
+	
 	public int addFutureMeeting(Set<ContactImpl> contacts, Calendar date){
 
 		if(date.getTime().before(theCalendar.getTime())){
@@ -82,7 +122,6 @@ public class ContactManagerImpl{
 		}
 	}
 
-
 	public PastMeetingImpl getPastMeeting(int id){
 
 		PastMeetingImpl  returner = (PastMeetingImpl) getMeeting(id);
@@ -92,7 +131,6 @@ public class ContactManagerImpl{
 		}
 		return returner;
 	}
-
 
 	public FutureMeetingImpl getFutureMeeting(int id){
 
@@ -222,17 +260,20 @@ public class ContactManagerImpl{
 		return pastReturn;
 	}
 
-	/**
-	* Create a new record for a meeting that took place in the past
-	*
-	* @param contacts a list of participants
-	* @param date the date on which the meeting took place
-	* @param text messages to be added about the meeting
-	* @throws IllegalArgumentException if the list of contacts is empty, or any of
-	* 		the contacts don't exist
-	* @throws NullPointerException if any of the arguments are null
-	*/
-	//public void addNewPastMeeting(Set<Contact> contacts, Calendar date, String text){}
+
+	public void addNewPastMeeting(Set<ContactImpl> contacts, Calendar date, String text) throws IllegalArgumentException, NullPointerException{
+		
+		if(date.getTime().after(theCalendar.getTime())){
+			throw new IllegalArgumentException("The time entered was in the future!");
+		}
+
+		MeetingImpl newPast = new PastMeetingImpl(meetingID, date, contacts);
+
+		addMeetingtoContacts(contacts, newPast);
+
+		meetingID++;
+
+	}
 
 	/**
 	*Add notes to a meeting.
@@ -260,23 +301,22 @@ public class ContactManagerImpl{
 	public void addNewContact(String name, String notes){
 
 		ContactImpl newContact = null;
-
-		if(contactList == null){
-			contactList = new ArrayList<ContactImpl>();
-		}
-
+		
 		try{
-
 			newContact = new ContactImpl(contactID, name, notes);
-
 			contactList.add(newContact);
+			contactID++;
 		} 
 		catch (NullPointerException ex){
 
 			System.out.println("Looks like you forgot to enter one of the values, please try again. ");
 			ex.printStackTrace();
 		}
-		contactID++;
+		System.out.println("The following contacts are currently in your manager:");
+			
+			for(int i = 0; i < contactList.size(); i++){
+				System.out.println(contactList.get(i).getName());
+			}
 	}
 
 	/**
@@ -310,6 +350,16 @@ public class ContactManagerImpl{
 	* @throws NullPointerException if the parameter is null
 	*/
 	//public Set<Contact> getContacts(String name){}
+	public String getInput(){
+		String str = "";
+		try{
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+			str = bufferedReader.readLine();
+		} catch (IOException ex){
+			ex.printStackTrace();
+		}
+		return str;
+	}
 
 	/**
 	* Save all data to disk
