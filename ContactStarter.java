@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class ContactStarter {
 	
@@ -87,13 +88,24 @@ public class ContactStarter {
 		if(a == 3){//returns selected contact
 			
 			System.out.println("");
-			System.out.println("Please enter the contact name or each contact id you require separated by commas now: ");
+			System.out.println("Please enter the contact name or each contact id you require one by one, enter F to finish: ");
 			String getContact = getInput();
+			ArrayList<Integer> contactIDs = new ArrayList<Integer>();
 			
 			if(Character.isDigit(getContact.charAt(0))){
 				
-				int contactID = getInt(getContact);
-				newContactManager.getContacts(contactID);
+				while(!getContact.equals("F")){
+					int newID = getInt(getContact);
+					contactIDs.add(newID);
+				}
+				
+				int[] idsToPass = new int[contactIDs.size()];
+				for(int i = 0; i < idsToPass.length; i++){
+					
+					idsToPass[i] = contactIDs.get(i).intValue();
+				}
+				
+				newContactManager.getContacts(idsToPass);
 				
 			} else {		
 				newContactManager.getContacts(getContact);
