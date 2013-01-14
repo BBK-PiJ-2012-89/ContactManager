@@ -81,9 +81,7 @@ public class ContactManagerImpl{
 		return meetingID;
 	}
 	
-	public Calendar getDate(){
-		System.out.print("Now please enter the date of the meeting (DD/MM/YYYY): ");
-		String dateString = getInput();
+	public Calendar getDate(String date){
 		Calendar cal = Calendar.getInstance();
 	    DateFormat df = new SimpleDateFormat("dd/MM/yyyy"); 
 	    Date newDate;

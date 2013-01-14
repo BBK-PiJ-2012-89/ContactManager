@@ -91,8 +91,10 @@ public class ContactStarter {
 			String getContact = getInput();
 			
 			if(Character.isDigit(getContact.charAt(0))){
-				int contactID = Integer.parseInt(getContact);
+				
+				int contactID = getInt(getContact);
 				newContactManager.getContacts(contactID);
+				
 			} else {		
 				newContactManager.getContacts(getContact);
 			}
@@ -103,28 +105,14 @@ public class ContactStarter {
 		
 		if(a == 4){//returns selected meeting/meetings
 			System.out.println("");
-			System.out.println("You have selected access meeting, to access a past meeting enter P, to access a future meeting entere F: ");
-			String pastFuture = getInput();
-			
-			if(pastFuture.equals("P")){
-				System.out.println("Ok, I see you have selected past meeting, please now enter the Meeting ID or contact name whose meeting(s) you would like to view: ");
-				String str = getInput();
-				
-				if(Character.isDigit(str.charAt(0))){
-					int contactID = getInt(str);
-					newContactManager.getPastMeeting(contactID);
-					
-				} else {						
-					newContactManager.getPastMeetingList(newContactManager.getContact(str));
-				}
-				
-				
-			} else if(pastFuture.equals("F")){
-				System.out.println("Ok, I see you have selected future meeting, please now enter the ID or date of the meeting you wish to access: ");
-				String iD = getInput();
-				int idNumber = Integer.parseInt(iD);	
-				newContactManager.getFutureMeeting(idNumber);			
+			System.out.println("Do you wish to access a past(P) or a future(F) meeting? ");
+			String str = getInput();
+			if(str.equals("P")){
+				accessPastMeeting();
+			} else if(str.equals("F")){
+				accessFutureMeeting();
 			}
+			welcome();
 		}
 		
 		if(a == 5){//adds meeting notes
@@ -150,6 +138,33 @@ public class ContactStarter {
 			ex.printStackTrace();
 		}
 		return str;
+	}
+	
+	public void accessFutureMeeting(){
+		System.out.println("You have selected access future meeting, now please either the ID of the meeting you would like to view, or alternatively enter a contact name or a date(DD/MM/YYYY) to view all associated meetings: ");
+		String str = getInput();
+		
+		if(str.charAt(2) == ('/')){
+			newContactManager.getFutureMeetingList(newContactManager.getDate(str));
+		} else if(Character.isDigit(str.charAt(0))){
+			int id = getInt(str);
+			newContactManager.getFutureMeeting(id);
+		} else {
+			newContactManager.getFutureMeetingList(newContactManager.getContact(str));
+		}
+	}
+	
+	public void accessPastMeeting(){
+		System.out.println("You have selected access past meeting, now please either the ID of the meeting you would like to view, or alternatively enter a contact name to view all associated meetings: ");
+		String str = getInput();
+		
+		if(Character.isDigit(str.charAt(0))){
+			int id = getInt(str);
+			newContactManager.getPastMeeting(id);
+		} else {
+			newContactManager.getPastMeetingList(newContactManager.getContact(str));
+		}
+		
 	}
 	
 	public int getInt(String input){
