@@ -20,6 +20,7 @@ public class ContactManagerImpl{
 	private int meetingID = 0;
 	private List<ContactImpl> contactList = new ArrayList<ContactImpl>();;
 	private List<MeetingImpl> meetingList = null;
+	private List<PastMeetingImpl> pastMeetingList = null;
 	private Calendar theCalendar = new GregorianCalendar();
 
 	public ContactManagerImpl(){
@@ -224,19 +225,29 @@ public class ContactManagerImpl{
 	* place on the specified date
 	*
 	* If there are none, the list will be returned empty. Otherwise,
-	* the list whill be chronologicall sorted and will not contain 
+	* the list will be chronologically sorted and will not contain 
 	* any duplicates.
 	*
 	* @param date the date
 	* @return the list of meetings
 	*/
-	//public List<Meeting> getFutureMeetingList(Calendar date){}
+	public List<MeetingImpl> getFutureMeetingList(Calendar date){
+		List<MeetingImpl> futureReturn = null;
+		
+		for(int i = 0; i < meetingList.size(); i++){
+			if(meetingList.get(i).getDate().equals(date)){
+				
+				futureReturn.add(meetingList.get(i));
+			}
+		}
+		return futureReturn;
+	}
 
 	/**
 	* Returns the list of past meetings in which this contact has participated
 	*
 	* If there are none, the list will be returned empty. Otherwise,
-	* the list whill be chronologicall sorted and will not contain 
+	* the list will be chronologically sorted and will not contain 
 	* any duplicates.
 	*
 	* @param contact one of the user's contacts
@@ -267,7 +278,6 @@ public class ContactManagerImpl{
 		return pastReturn;
 	}
 
-
 	public void addNewPastMeeting(Set<ContactImpl> contacts, Calendar date, String text) throws IllegalArgumentException, NullPointerException{
 		
 		if(date.getTime().after(theCalendar.getTime())){
@@ -282,42 +292,27 @@ public class ContactManagerImpl{
 
 	}
 
-	/**
-	*Add notes to a meeting.
-	*
-	* This method is used when a future meeting takes place, and is
-	* then converted to a past meeting (with notes).
-	*
-	* It can be also used to add ntoes to a past meeting at a later date.
-	*
-	* @param id the ID of the meeting
-	* @param text messages to be added about the meeting.
-	* @throws IllegalArgumentException if the meeting does not exist
-	* @throws IllegalStateException if the meeting is set for a date in the future
-	* @throws NullPointerException if the notes are null
-	*/
-	//public void addMeetingNotes(int id, String text){}
+	public void addMeetingNotes(int id, String notes) throws NullPointerException{
+		
+		
+		try{
+			pastMeetingList.get(id).setNotes(notes);
+			
+		} catch (IllegalArgumentException ex){
+			System.out.println("I'm sorry but the Id entered does not seem to exist, please try again.");
+		} catch (IllegalStateException ex){
+			System.out.println("I'm sorry but the ID entered corresponds to a future meeting, please try again.");
+		}
+		
+	}
 
-	/**
-	* Create a new contact with the specified name and notes.
-	*
-	* @param name the name of the contact
-	* @param notes notes to be added about the contact
-	* @throws NullPointerException if the name or the notes are null
-	*/
-	public void addNewContact(String name, String notes){
+	public void addNewContact(String name, String notes)throws NullPointerException{
 
 		ContactImpl newContact = null;
 		
-		try{
-			newContact = new ContactImpl(contactID, name, notes);
-			contactList.add(newContact);
-		} 
-		catch (NullPointerException ex){
-
-			System.out.println("Looks like you forgot to enter one of the values, please try again. ");
-			ex.printStackTrace();
-		}
+		newContact = new ContactImpl(contactID, name, notes);
+		contactList.add(newContact);
+			
 		System.out.println("The contact " + name + " with the ID " + contactList.get(contactID).getId() + " has now been added to contact manager.");
 		
 		contactID++;
@@ -335,31 +330,13 @@ public class ContactManagerImpl{
 			returnContacts.add(contact);
 		}
 		
-		Iterator<ContactImpl> it = returnContacts.iterator();
-		
-		 while (it.hasNext()) {
-			ContactImpl holder = it.next();
-			System.out.print("ID: ");
-            System.out.println(holder.getId());
-            System.out.print("Name: ");
-            System.out.println(holder.getName());
-            System.out.print("Notes: ");
-            System.out.println(holder.getNotes());
-		}
-		
+		printContacts(returnContacts);
 		
 		return returnContacts;
 
 	}
 
-	/**
-	* Returns a list with the contacts whose name contains that string.
-	*
-	* @param name the string to search for
-	* @return a list with the contacts whose name contains that string.
-	* @throws NullPointerException if the parameter is null
-	*/
-	public Set<ContactImpl> getContacts(String name){
+	public Set<ContactImpl> getContacts(String name) throws NullPointerException{
 		Set<ContactImpl> returnContacts = new HashSet<ContactImpl>();
 
 		for(int i = 0; i < contactList.size(); i++){
@@ -368,10 +345,37 @@ public class ContactManagerImpl{
 			}
 		}
 		
+		System.out.println("Contacts whose names contain " + name + ": ");
+		printContacts(returnContacts);
+		
 		return returnContacts;
 	}
+
+	public ContactImpl getContact(String name){
+		ContactImpl foundContact = null;
+		for(int i = 0; i < contactList.size(); i ++){
+			if(contactList.get(i).getName().equals(name)){
+				foundContact = contactList.get(i);
+			}
+		}
+		return foundContact;
+	}
 	
-	
+	public void printContacts(Set<ContactImpl> returnContacts){
+		
+		Iterator<ContactImpl> it = returnContacts.iterator();
+		
+		 while (it.hasNext()) {
+			ContactImpl holder = it.next();
+			System.out.print("ID: ");
+           System.out.println(holder.getId());
+           System.out.print("Name: ");
+           System.out.println(holder.getName());
+           System.out.print("Notes: ");
+           System.out.println(holder.getNotes());
+           System.out.println("");
+		}
+	}
 	
 	public String getInput(){
 		String str = "";

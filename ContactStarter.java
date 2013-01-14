@@ -101,19 +101,26 @@ public class ContactStarter {
 		
 
 		
-		if(a == 4){
+		if(a == 4){//returns selected meeting/meetings
 			System.out.println("");
 			System.out.println("You have selected access meeting, to access a past meeting enter P, to access a future meeting entere F: ");
 			String pastFuture = getInput();
 			
 			if(pastFuture.equals("P")){
-				System.out.println("Ok, I see you have selected past meeting, please now enter the meeting ID you wish to access: ");
-				String iD = getInput();
-				int idNumber = Integer.parseInt(iD);
-				newContactManager.getPastMeeting(idNumber);
+				System.out.println("Ok, I see you have selected past meeting, please now enter the Meeting ID or contact name whose meeting(s) you would like to view: ");
+				String str = getInput();
+				
+				if(Character.isDigit(str.charAt(0))){
+					int contactID = getInt(str);
+					newContactManager.getPastMeeting(contactID);
+					
+				} else {						
+					newContactManager.getPastMeetingList(newContactManager.getContact(str));
+				}
+				
 				
 			} else if(pastFuture.equals("F")){
-				System.out.println("Ok, I see you have selected future meeting, please now enter the meeting ID you wish to access: ");
+				System.out.println("Ok, I see you have selected future meeting, please now enter the ID or date of the meeting you wish to access: ");
 				String iD = getInput();
 				int idNumber = Integer.parseInt(iD);	
 				newContactManager.getFutureMeeting(idNumber);			
@@ -121,12 +128,16 @@ public class ContactStarter {
 		}
 		
 		if(a == 5){//adds meeting notes
+			
 			System.out.println("");
-			System.out.println("You have selected add meeting notes, begin by entering the contacts name or type EXIT to return to the main menu: ");
+			System.out.println("You have selected add meeting notes, please enter the ID of the meeting you wish to change: ");
 			String str = getInput();
-			if(str.equals("EXIT")){
+			int iD = getInt(str);
+			
+			System.out.println("Now please enter the notes you wish to add: ");
+			String newNotes = getInput();
+			newContactManager.addMeetingNotes(iD, newNotes);
 				welcome();
-			}
 		}
 	}
 
@@ -140,13 +151,10 @@ public class ContactStarter {
 		}
 		return str;
 	}
-
-	public void contactMeeting(){
-		
-	}
 	
-	public void dateMeeting(){
-		
+	public int getInt(String input){
+		int returnInt = Integer.parseInt(input);
+		return returnInt;
 	}
 	
 }
