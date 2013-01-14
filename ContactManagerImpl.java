@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class ContactManagerImpl{
 	public ContactManagerImpl(){
 	}
 
-	public void makeMeeting(){
+	public int makeMeeting(){
 		//this method needs a selector at the beginning 
 		
 		System.out.println("Is this a future meeting (FUTR), or has it already occured (PAST):");
@@ -67,13 +68,16 @@ public class ContactManagerImpl{
 
 		Calendar calHolder = getDate();
 		if(!past){
-			int meetingID = addFutureMeeting(contacts, calHolder);
+			addFutureMeeting(contacts, calHolder);
 		} else if(past){
 			System.out.println("Please now enter any additional notes you may have about this meeting.");
 			String notes = getInput();
 			addNewPastMeeting(contacts, calHolder, notes);
 		}
+		
 		System.out.println("The meeting has been successfully entered, its meeting ID is " + meetingID);
+		
+		return meetingID;
 	}
 	
 	public Calendar getDate(){
@@ -110,6 +114,7 @@ public class ContactManagerImpl{
 
 		meetingID++;
 
+		System.out.println(newFuture.getID());
 		return newFuture.getID();
 	}
 
@@ -176,9 +181,7 @@ public class ContactManagerImpl{
 			System.out.println("That contact does not exist!");
 			ex.printStackTrace();
 		}
-
-		List<FutureMeetingImpl> futureReturn = null;
-
+		
 
 		if(futureMeetings != null){
 			for(int i = 0; i < futureMeetings.size(); i++){
@@ -187,11 +190,13 @@ public class ContactManagerImpl{
 				}
 			}
 		}
-
+		
+		
 		if(futureMeetings.isEmpty()){
 			return null;
 		} else {
-
+			List<FutureMeetingImpl> futureReturn = null;
+			
 			for(int i = 0; i < futureMeetings.size(); i ++){
 				FutureMeetingImpl holder  = (FutureMeetingImpl) futureMeetings.get(i);
 				futureReturn.add(holder);
@@ -204,9 +209,11 @@ public class ContactManagerImpl{
 	public List<MeetingImpl> getMeetings(ContactImpl contact){
 		List<MeetingImpl> contactMeetings = null;
 
-		if(contactMeetings != null){
-
+		if(contact.getMeetings() != null){
+			
 			contactMeetings = contact.getMeetings();
+		} else {
+			System.out.println("This contact has no meetings!");
 		}
 
 		return contactMeetings;
@@ -305,31 +312,21 @@ public class ContactManagerImpl{
 		try{
 			newContact = new ContactImpl(contactID, name, notes);
 			contactList.add(newContact);
-			contactID++;
 		} 
 		catch (NullPointerException ex){
 
 			System.out.println("Looks like you forgot to enter one of the values, please try again. ");
 			ex.printStackTrace();
 		}
-		System.out.println("The following contacts are currently in your manager:");
-			
-			for(int i = 0; i < contactList.size(); i++){
-				System.out.println(contactList.get(i).getName());
-			}
+		System.out.println("The contact " + name + " with the ID " + contactList.get(contactID).getId() + " has now been added to contact manager.");
+		
+		contactID++;
 	}
 
-	/**
-	* Returns a list containing the contacts that correspond to the IDs.
-	*
-	* @param ids an arbitrary number of contact IDs
-	* @return a list containing the contacts that correspond to the IDs.
-	* @throws IllegalArgumentException if any of the IDs does not correspond to a real contact
-	*/
-	public Set<ContactImpl> getContacts(int... ids){
+	public Set<ContactImpl> getContacts(int... contactIDs){
 		Set<ContactImpl> returnContacts = new HashSet<ContactImpl>();
 
-		for(int id : ids){
+		for(int id : contactIDs){
 			ContactImpl contact = contactList.get(id);
 			if(contact == null){
 				throw new IllegalArgumentException("The contact id " + id + "does not exist.");
@@ -337,7 +334,20 @@ public class ContactManagerImpl{
 
 			returnContacts.add(contact);
 		}
-
+		
+		Iterator<ContactImpl> it = returnContacts.iterator();
+		
+		 while (it.hasNext()) {
+			ContactImpl holder = it.next();
+			System.out.print("ID: ");
+            System.out.println(holder.getId());
+            System.out.print("Name: ");
+            System.out.println(holder.getName());
+            System.out.print("Notes: ");
+            System.out.println(holder.getNotes());
+		}
+		
+		
 		return returnContacts;
 
 	}
@@ -349,7 +359,20 @@ public class ContactManagerImpl{
 	* @return a list with the contacts whose name contains that string.
 	* @throws NullPointerException if the parameter is null
 	*/
-	//public Set<Contact> getContacts(String name){}
+	public Set<ContactImpl> getContacts(String name){
+		Set<ContactImpl> returnContacts = new HashSet<ContactImpl>();
+
+		for(int i = 0; i < contactList.size(); i++){
+			if(contactList.get(i).getName().toLowerCase().contains(name.toLowerCase())){
+				returnContacts.add(contactList.get(i));
+			}
+		}
+		
+		return returnContacts;
+	}
+	
+	
+	
 	public String getInput(){
 		String str = "";
 		try{
