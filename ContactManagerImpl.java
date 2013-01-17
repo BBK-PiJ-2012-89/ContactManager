@@ -13,26 +13,25 @@ import java.util.HashSet;
 import java.util.GregorianCalendar;
 import java.text.SimpleDateFormat;
 
-
 public class ContactManagerImpl{
 
 	private int contactID = 0;
 	private int meetingID = 0;
 	private List<ContactImpl> contactList = new ArrayList<ContactImpl>();;
-	private List<MeetingImpl> meetingList = null;
+	private List<MeetingImpl> meetingList = new ArrayList<MeetingImpl>();
 	private List<PastMeetingImpl> pastMeetingList = null;
 	private Calendar theCalendar = new GregorianCalendar();
 
 	public ContactManagerImpl(){
 	}
 
-	public int makeMeeting(){
+	public void makeMeeting(){
 		//this method needs a selector at the beginning 
 		
-		System.out.println("Is this a future meeting (FUTR), or has it already occured (PAST):");
+		System.out.println("Is this a future meeting (F), or has it already occured (P):");
 		String pastOrFuture = getInput();
 		boolean past;
-		if(pastOrFuture.equals("PAST")){
+		if(pastOrFuture.equals("P")){
 			past = true;
 		} else {
 			past = false;
@@ -41,9 +40,9 @@ public class ContactManagerImpl{
 		Set<ContactImpl> contacts = null;
 		String str = null;
 		boolean finished = false;
+		System.out.println("Begin by entering, one by one, the names contacts who will attend the meeting, when you are finished, type DONE: ");
 		while(!finished){
 			boolean contactExists = false;
-			System.out.println("Begin by entering, one by one, the names contacts who will attend the meeting, when you are finished, type DONE: ");
 			str = getInput();
 			try{
 				for(int i = 0; i < contactList.size(); i++){
@@ -66,8 +65,9 @@ public class ContactManagerImpl{
 				System.out.println("I'm sorry but the contact "+ str + ", does not appear to be in our database, please check the name and try again or return to the home screen to enter a new contact.");
 			}
 		}
-
-		Calendar calHolder = getDate();
+		System.out.println("Now please enter the date(DD/MM/YYYY): ");
+		String dateString = getInput();
+		Calendar calHolder = getDate(dateString);
 		if(!past){
 			addFutureMeeting(contacts, calHolder);
 		} else if(past){
@@ -76,9 +76,10 @@ public class ContactManagerImpl{
 			addNewPastMeeting(contacts, calHolder, notes);
 		}
 		
-		System.out.println("The meeting has been successfully entered, its meeting ID is " + meetingID);
-		
-		return meetingID;
+		for(int i = 0; i < meetingList.size() ; i++){
+			System.out.println(meetingList.get(i).getDate());
+		}
+				
 	}
 	
 	public Calendar getDate(String date){
@@ -87,8 +88,8 @@ public class ContactManagerImpl{
 	    Date newDate;
 	    Calendar calHolder = Calendar.getInstance();;
 	    try {
-	        newDate = df.parse(dateString);
-	        cal.setTime(df.parse(dateString));
+	        newDate = df.parse(date);
+	        cal.setTime(df.parse(date));
 	    	calHolder.setTime(newDate);
 	    } catch (ParseException e) {
 	        e.printStackTrace();
@@ -102,18 +103,20 @@ public class ContactManagerImpl{
 	
 	public int addFutureMeeting(Set<ContactImpl> contacts, Calendar date){
 
-		if(date.getTime().before(theCalendar.getTime())){
+//		if(date.getTime().before(theCalendar.getTime())){
+//
+//			throw new IllegalArgumentException("The time entered was in the past!");
+//		}
 
-			throw new IllegalArgumentException("The time entered was in the past!");
-		}
+		MeetingImpl newFuture = new FutureMeetingImpl(meetingID, date, contacts);	
 
-		MeetingImpl newFuture = new FutureMeetingImpl(meetingID, date, contacts);
+		meetingList.add(newFuture);
 
 		addMeetingtoContacts(contacts, newFuture);
 
 		meetingID++;
 
-		System.out.println(newFuture.getID());
+		System.out.println("Your new meeting has been added, its ID is " + newFuture.getID());
 		return newFuture.getID();
 	}
 
@@ -127,11 +130,19 @@ public class ContactManagerImpl{
 	}
 
 	public PastMeetingImpl getPastMeeting(int id){
+		
+		PastMeetingImpl  returner = null;
+		
+		try{
+			returner = (PastMeetingImpl) getMeeting(id);
 
-		PastMeetingImpl  returner = (PastMeetingImpl) getMeeting(id);
-
-		if(returner.getDate().getTime().after(theCalendar.getTime())){
-			throw new IllegalArgumentException("The meeting corresponding to the ID that you entered has not yet occurred.");
+			if(returner.getDate().getTime().after(theCalendar.getTime())){
+				throw new IllegalArgumentException("The meeting corresponding to the ID that you entered has not yet occurred.");
+			}
+			
+		} catch (ClassCastException ex){
+			
+			System.out.println("The ID you entered was for a future meeting! Please try again");
 		}
 		return returner;
 	}
@@ -166,9 +177,9 @@ public class ContactManagerImpl{
 				}
 			}
 		}
-
 		return isMeetingNull;
 	}
+
 
 	public List<FutureMeetingImpl> getFutureMeetingList(ContactImpl contact){
 		List<MeetingImpl> futureMeetings = null;
@@ -194,7 +205,7 @@ public class ContactManagerImpl{
 		if(futureMeetings.isEmpty()){
 			return null;
 		} else {
-			List<FutureMeetingImpl> futureReturn = null;
+			List<FutureMeetingImpl> futureReturn = new ArrayList<FutureMeetingImpl>();
 			
 			for(int i = 0; i < futureMeetings.size(); i ++){
 				FutureMeetingImpl holder  = (FutureMeetingImpl) futureMeetings.get(i);
@@ -230,7 +241,7 @@ public class ContactManagerImpl{
 	* @return the list of meetings
 	*/
 	public List<MeetingImpl> getFutureMeetingList(Calendar date){
-		List<MeetingImpl> futureReturn = null;
+		List<MeetingImpl> futureReturn = new ArrayList<MeetingImpl>();
 		
 		for(int i = 0; i < meetingList.size(); i++){
 			if(meetingList.get(i).getDate().equals(date)){
@@ -253,9 +264,11 @@ public class ContactManagerImpl{
 	* @throws IllegalArgumentException if the contact does not exist
 	*/
 	public List<PastMeetingImpl> getPastMeetingList(ContactImpl contact){
+		
 		List<MeetingImpl> pastMeetings = getMeetings(contact);
-		List<PastMeetingImpl> pastReturn = null;
+		List<PastMeetingImpl> pastReturn =  new ArrayList<PastMeetingImpl>();;
 
+		
 		if(pastMeetings != null){
 			for(int i = 0; i < pastMeetings.size(); i++){
 				if(pastMeetings.get(i).getDate().getTime().after(theCalendar.getTime())){
@@ -278,11 +291,13 @@ public class ContactManagerImpl{
 
 	public void addNewPastMeeting(Set<ContactImpl> contacts, Calendar date, String text) throws IllegalArgumentException, NullPointerException{
 		
-		if(date.getTime().after(theCalendar.getTime())){
-			throw new IllegalArgumentException("The time entered was in the future!");
-		}
+//		if(date.getTime().after(theCalendar.getTime())){
+//			throw new IllegalArgumentException("The time entered was in the future!");
+//		}
 
 		MeetingImpl newPast = new PastMeetingImpl(meetingID, date, contacts);
+		
+		meetingList.add(newPast);
 
 		addMeetingtoContacts(contacts, newPast);
 
