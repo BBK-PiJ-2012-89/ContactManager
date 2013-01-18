@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,39 +16,38 @@ public class ContactManagerImpl{
 
 	private int contactID = 0;
 	private int meetingID = 0;
-	private List<ContactImpl> contactList = new ArrayList<ContactImpl>();;
+	private int futureCounter = 0;
+	private List<ContactImpl> contactList = new ArrayList<ContactImpl>();
 	private List<MeetingImpl> meetingList = new ArrayList<MeetingImpl>();
-	private List<PastMeetingImpl> pastMeetingList = null;
+	private List<PastMeetingImpl> pastMeetingList = new ArrayList<PastMeetingImpl>();
 	private Calendar theCalendar = new GregorianCalendar();
+	private SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 
 	public ContactManagerImpl(){
 	}
 
 	public void makeMeeting(){
-		//this method needs a selector at the beginning 
 		
 		System.out.println("Is this a future meeting (F), or has it already occured (P):");
 		String pastOrFuture = getInput();
 		boolean past;
-		if(pastOrFuture.equals("P")){
+		if(pastOrFuture.equals("p")){
 			past = true;
 		} else {
 			past = false;
 		}
 		
-		Set<ContactImpl> contacts = null;
+		Set<ContactImpl> contacts = new HashSet<ContactImpl>();;
 		String str = null;
+		System.out.println("Begin by entering, one by one, the names contacts who will attend the meeting, when you are finished, type D: ");
 		boolean finished = false;
-		System.out.println("Begin by entering, one by one, the names contacts who will attend the meeting, when you are finished, type DONE: ");
+		
 		while(!finished){
 			boolean contactExists = false;
 			str = getInput();
 			try{
 				for(int i = 0; i < contactList.size(); i++){
 					if(contactList.get(i).getName().equals(str)){
-						if(contacts == null){
-							contacts = new HashSet<ContactImpl>();
-						}
 						contacts.add(contactList.get(i));
 						System.out.println("Thank you, " + str + " has been added to the Meeting.");
 						contactExists = true;
@@ -59,32 +57,30 @@ public class ContactManagerImpl{
 				ex.printStackTrace();
 				System.out.println("You don't seem to have added any contacts yet!");
 			}
-			if(str.equals("DONE")){
+			
+			if(str.equals("d")){
 				finished = true;
 			} else if(contactExists == false){
 				System.out.println("I'm sorry but the contact "+ str + ", does not appear to be in our database, please check the name and try again or return to the home screen to enter a new contact.");
 			}
 		}
+		
 		System.out.println("Now please enter the date(DD/MM/YYYY): ");
 		String dateString = getInput();
 		Calendar calHolder = getDate(dateString);
 		if(!past){
-			addFutureMeeting(contacts, calHolder);
+			addFutureMeeting(contacts, calHolder, dateString);
 		} else if(past){
 			System.out.println("Please now enter any additional notes you may have about this meeting.");
 			String notes = getInput();
-			addNewPastMeeting(contacts, calHolder, notes);
+			addNewPastMeeting(contacts, calHolder, notes, dateString);
 		}
-		
-		for(int i = 0; i < meetingList.size() ; i++){
-			System.out.println(meetingList.get(i).getDate());
-		}
-				
+					
 	}
 	
 	public Calendar getDate(String date){
 		Calendar cal = Calendar.getInstance();
-	    DateFormat df = new SimpleDateFormat("dd/MM/yyyy"); 
+	   // DateFormat df = new SimpleDateFormat("dd/MM/yyyy"); 
 	    Date newDate;
 	    Calendar calHolder = Calendar.getInstance();;
 	    try {
@@ -101,22 +97,24 @@ public class ContactManagerImpl{
 		return contactList;
 	}
 	
-	public int addFutureMeeting(Set<ContactImpl> contacts, Calendar date){
+	public int addFutureMeeting(Set<ContactImpl> contacts, Calendar date, String dateString){
 
 //		if(date.getTime().before(theCalendar.getTime())){
 //
 //			throw new IllegalArgumentException("The time entered was in the past!");
 //		}
-
-		MeetingImpl newFuture = new FutureMeetingImpl(meetingID, date, contacts);	
+		
+		MeetingImpl newFuture = new FutureMeetingImpl(meetingID, date, contacts, dateString);
 
 		meetingList.add(newFuture);
 
 		addMeetingtoContacts(contacts, newFuture);
 
 		meetingID++;
-
+		System.out.println("");
 		System.out.println("Your new meeting has been added, its ID is " + newFuture.getID());
+		System.out.println("");
+
 		return newFuture.getID();
 	}
 
@@ -133,53 +131,55 @@ public class ContactManagerImpl{
 		
 		PastMeetingImpl  returner = null;
 		
-		try{
-			returner = (PastMeetingImpl) getMeeting(id);
+		for(int i = 0; i < pastMeetingList.size(); i++){
 
-			if(returner.getDate().getTime().after(theCalendar.getTime())){
-				throw new IllegalArgumentException("The meeting corresponding to the ID that you entered has not yet occurred.");
+			if(pastMeetingList.get(i).getID() == id){
+				returner = pastMeetingList.get(i);
 			}
-			
-		} catch (ClassCastException ex){
-			
-			System.out.println("The ID you entered was for a future meeting! Please try again");
 		}
+		
+		System.out.println("");
+		System.out.println("Meeting: " + returner.getID());
+		System.out.println("Date: " + returner.getDateString());
+		System.out.print("Attendees: ");
+		printContacts(returner.getContacts());
+		System.out.println("Notes: " + returner.getNotes());
 		return returner;
 	}
 
 	public FutureMeetingImpl getFutureMeeting(int id){
-
+		
 		FutureMeetingImpl  returner = (FutureMeetingImpl) getMeeting(id);
-
-		if(returner.getDate().getTime().before(theCalendar.getTime())){
-			throw new IllegalArgumentException("The meeting corresponding to the ID that you entered has not yet occurred.");
+		try{
+			if(returner.getDate().getTime().before(theCalendar.getTime())){
+				throw new IllegalArgumentException("The meeting corresponding to the ID that you entered has not yet occurred.");
+			}
+		} catch (IllegalArgumentException ex){
+			System.out.println("That meeting has not yet occurred!");
+		} catch (NullPointerException ex){
+			System.out.println("The ID entered does not exist!");
 		}
+		
+		System.out.println("");
+		System.out.println("Meeting: " + returner.getID());
+		System.out.println("Date: " + (returner.getDateString()));
+		System.out.print("Attendees: "); 
+		printContacts(returner.getContacts());
 		return returner;
 	}
 
 	private MeetingImpl getMeeting(int id){
+		
+		MeetingImpl returner = null;
 
-		MeetingImpl isMeetingNull = null;
+			for(int i = 0; i < meetingList.size(); i++){
 
-		for(int i = 0; i < meetingList.size(); i++){
-
-			if(meetingList.get(i).getID() == id){
-
-				if((meetingList.get(i).getDate().getTime()).before(theCalendar.getTime())){
-
-					throw new IllegalArgumentException();
-
-				} else {
-
-					MeetingImpl returner = meetingList.get(i);
-
-					return returner;
+				if(meetingList.get(i).getID() == id){
+					returner = meetingList.get(i);
 				}
 			}
-		}
-		return isMeetingNull;
+	return returner;
 	}
-
 
 	public List<FutureMeetingImpl> getFutureMeetingList(ContactImpl contact){
 		List<MeetingImpl> futureMeetings = null;
@@ -211,6 +211,7 @@ public class ContactManagerImpl{
 				FutureMeetingImpl holder  = (FutureMeetingImpl) futureMeetings.get(i);
 				futureReturn.add(holder);
 			}
+			printMeetings(futureMeetings);
 			return futureReturn;
 
 		}
@@ -225,21 +226,10 @@ public class ContactManagerImpl{
 		} else {
 			System.out.println("This contact has no meetings!");
 		}
-
+				
 		return contactMeetings;
 	}
 
-	/**
-	* Returns the list of future meetings scheduled for, or that took 
-	* place on the specified date
-	*
-	* If there are none, the list will be returned empty. Otherwise,
-	* the list will be chronologically sorted and will not contain 
-	* any duplicates.
-	*
-	* @param date the date
-	* @return the list of meetings
-	*/
 	public List<MeetingImpl> getFutureMeetingList(Calendar date){
 		List<MeetingImpl> futureReturn = new ArrayList<MeetingImpl>();
 		
@@ -249,21 +239,11 @@ public class ContactManagerImpl{
 				futureReturn.add(meetingList.get(i));
 			}
 		}
+		printMeetings(futureReturn);
 		return futureReturn;
 	}
 
-	/**
-	* Returns the list of past meetings in which this contact has participated
-	*
-	* If there are none, the list will be returned empty. Otherwise,
-	* the list will be chronologically sorted and will not contain 
-	* any duplicates.
-	*
-	* @param contact one of the user's contacts
-	* @return the list of future meeitngs sceduled with the contact (maybe empty)
-	* @throws IllegalArgumentException if the contact does not exist
-	*/
-	public List<PastMeetingImpl> getPastMeetingList(ContactImpl contact){
+	public List<PastMeetingImpl> getPastMeetingList(ContactImpl contact) throws IllegalArgumentException{
 		
 		List<MeetingImpl> pastMeetings = getMeetings(contact);
 		List<PastMeetingImpl> pastReturn =  new ArrayList<PastMeetingImpl>();;
@@ -278,6 +258,7 @@ public class ContactManagerImpl{
 		}
 
 		if(pastMeetings.isEmpty()){
+			System.out.println("This contact has no past meetings.");
 			return null;
 		} else {
 			for(int i = 0; i < pastMeetings.size(); i ++){
@@ -285,21 +266,28 @@ public class ContactManagerImpl{
 				pastReturn.add(holder);
 			}
 		}
-
+		System.out.println("");
+		printPastMeetings(pastReturn);
 		return pastReturn;
 	}
 
-	public void addNewPastMeeting(Set<ContactImpl> contacts, Calendar date, String text) throws IllegalArgumentException, NullPointerException{
+	public void addNewPastMeeting(Set<ContactImpl> contacts, Calendar date, String notes, String dateString) throws IllegalArgumentException, NullPointerException{
 		
 //		if(date.getTime().after(theCalendar.getTime())){
 //			throw new IllegalArgumentException("The time entered was in the future!");
 //		}
 
-		MeetingImpl newPast = new PastMeetingImpl(meetingID, date, contacts);
-		
+		MeetingImpl newPast = new PastMeetingImpl(meetingID, date, contacts, notes, dateString);
+		PastMeetingImpl thePast = (PastMeetingImpl) newPast;
 		meetingList.add(newPast);
+		pastMeetingList.add(thePast);
 
 		addMeetingtoContacts(contacts, newPast);
+		
+		System.out.println("");
+		System.out.println("Date: " + meetingList.get(meetingID).getDateString());
+		System.out.println("ID: " + meetingList.get(meetingID).getID());
+		System.out.println("Notes :" + pastMeetingList.get(meetingID).getNotes());
 
 		meetingID++;
 
@@ -309,12 +297,14 @@ public class ContactManagerImpl{
 		
 		
 		try{
-			pastMeetingList.get(id).setNotes(notes);
+			pastMeetingList.get(id-futureCounter).setNotes(notes);
 			
 		} catch (IllegalArgumentException ex){
 			System.out.println("I'm sorry but the Id entered does not seem to exist, please try again.");
 		} catch (IllegalStateException ex){
 			System.out.println("I'm sorry but the ID entered corresponds to a future meeting, please try again.");
+		} catch (IndexOutOfBoundsException ex){
+			System.out.println("Error, the ID entered does not correspond to a past meeting, please try again");
 		}
 		
 	}
@@ -325,7 +315,8 @@ public class ContactManagerImpl{
 		
 		newContact = new ContactImpl(contactID, name, notes);
 		contactList.add(newContact);
-			
+		
+		System.out.println("");	
 		System.out.println("The contact " + name + " with the ID " + contactList.get(contactID).getId() + " has now been added to contact manager.");
 		
 		contactID++;
@@ -333,18 +324,21 @@ public class ContactManagerImpl{
 
 	public Set<ContactImpl> getContacts(int... contactIDs){
 		Set<ContactImpl> returnContacts = new HashSet<ContactImpl>();
-
-		for(int id : contactIDs){
-			ContactImpl contact = contactList.get(id);
-			if(contact == null){
-				throw new IllegalArgumentException("The contact id " + id + "does not exist.");
+		
+		try{
+			for(int id : contactIDs){
+				ContactImpl contact = contactList.get(id);
+				if(contact == null){
+					throw new IllegalArgumentException("The contact id " + id + "does not exist.");
+				}
+		
+				returnContacts.add(contact);
 			}
-
-			returnContacts.add(contact);
+		} catch(IllegalArgumentException ex){
+			System.out.println("The contact id does not exist.");
 		}
-		
 		printContacts(returnContacts);
-		
+				
 		return returnContacts;
 
 	}
@@ -375,21 +369,43 @@ public class ContactManagerImpl{
 	}
 	
 	public void printContacts(Set<ContactImpl> returnContacts){
+
 		
 		Iterator<ContactImpl> it = returnContacts.iterator();
-		
 		 while (it.hasNext()) {
 			ContactImpl holder = it.next();
 			System.out.print("ID: ");
-           System.out.println(holder.getId());
-           System.out.print("Name: ");
-           System.out.println(holder.getName());
-           System.out.print("Notes: ");
-           System.out.println(holder.getNotes());
+           System.out.print(holder.getId());
+           System.out.print(" Name: ");
+           System.out.print(holder.getName());
+           System.out.print(" Notes: ");
+           System.out.print(holder.getNotes());
            System.out.println("");
 		}
 	}
 	
+	public void printMeetings(List<MeetingImpl> contactMeetings){
+		for(int i = 0; i < contactMeetings.size(); i++){
+			System.out.println("Meeting ID: " + contactMeetings.get(i).getID());
+			System.out.println("Date: " + contactMeetings.get(i).getDateString());
+			System.out.print("Attendees: ");
+			printContacts(contactMeetings.get(i).getContacts());
+				
+		}
+	}
+	
+	public void printPastMeetings(List<PastMeetingImpl> contactMeetings){
+		
+		for(int i = 0; i < contactMeetings.size(); i++){
+			System.out.println("Meeting ID: " + contactMeetings.get(i).getID());
+			System.out.println("Date: " + contactMeetings.get(i).getDateString());
+			System.out.print("Attendees: ");
+			printContacts(contactMeetings.get(i).getContacts());
+			System.out.println("Meeting Notes: " + contactMeetings.get(i).getNotes());
+				
+		}
+	}
+
 	public String getInput(){
 		String str = "";
 		try{
@@ -398,7 +414,8 @@ public class ContactManagerImpl{
 		} catch (IOException ex){
 			ex.printStackTrace();
 		}
-		return str;
+		String returnStr = str.toLowerCase();
+		return returnStr;
 	}
 
 	/**

@@ -9,11 +9,16 @@ public class PastMeetingImpl extends MeetingImpl implements Meeting {
 
 	private String notes;
 
-	public PastMeetingImpl(int iD, Calendar date, Set<ContactImpl> attendees){
-		super(iD, date, attendees);
+	public PastMeetingImpl(int iD, Calendar date, Set<ContactImpl> attendees, String notes, String dateString){
+		super(iD, date, attendees, dateString);
+		this.notes = notes;
 	}
 	
-	String getNotes(){
+	public String getNotes(){
 		return notes;
+	}
+	
+	public void setNotes(String notes){
+		this.notes = notes;
 	}
 }

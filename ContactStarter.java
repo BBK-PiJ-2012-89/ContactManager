@@ -23,9 +23,6 @@ public class ContactStarter {
 		
 		String str = "";
 		
-		while(!str.equals("EXIT")){
-			
-		
 		int selection = 0;
 		
         System.out.println("------------------------------------------------------");
@@ -44,6 +41,10 @@ public class ContactStarter {
 			
 			str = getInput();
 			
+			if(str.equals("exit")){
+				break;
+			}
+			
 			try{
 				selection = Integer.parseInt(str);
 
@@ -57,7 +58,6 @@ public class ContactStarter {
 		}
 
 		mainMenu(selection);
-		}
 	}
 
 	public void mainMenu(int a){
@@ -66,7 +66,7 @@ public class ContactStarter {
 			System.out.println("");
 			System.out.print("You have selected add new Contact, begin by entering the contacts name or type  EXIT to return to the main menu: ");
 			String name = getInput();
-			if(name.equals("EXIT")){
+			if(name.equals("exit")){
 				welcome();
 			}
 			System.out.print("Now please enter any notes that you may have regarding the contact: ");
@@ -77,12 +77,14 @@ public class ContactStarter {
 			System.out.println("");
 			System.out.println("Thank you, your new contact has now been added to the database, you will now be returned to the main menu.");
 			System.out.println("");
+			welcome();
 		}
 
 
 		if(a == 2){//Adds meeting
 			System.out.println("");
 			newContactManager.makeMeeting();
+			welcome();
 		}
 		
 		if(a == 3){//returns selected contact
@@ -93,7 +95,7 @@ public class ContactStarter {
 			ArrayList<Integer> contactIDs = new ArrayList<Integer>();
 			
 			if(Character.isDigit(getContact.charAt(0))){
-				while(!getContact.equals("F")){
+				while(!getContact.equals("f")){
 					int newID = getInt(getContact);
 					contactIDs.add(newID);
 					getContact = getInput();
@@ -114,6 +116,7 @@ public class ContactStarter {
 					newContactManager.getContacts(getContact);
 				}
 			}
+			welcome();
 		}
 		
 		if(a == 4){//returns selected meeting/meetings
@@ -122,15 +125,17 @@ public class ContactStarter {
 			System.out.println("Do you wish to access a past(P) or a future(F) meeting? ");
 			String str = getInput();
 			
-			while(str!= "P" || str!= "F"){
-				if(str.equals("P")){
+			while(str!= "p" || str!= "f"){
+				if(str.equals("p")){
 					accessPastMeeting();
-				} else if(str.equals("F")){
+				} else if(str.equals("f")){
 					accessFutureMeeting();
 				} else {
 					System.out.println("That was not an option, please try again.");
 				}
+				str = getInput();
 			}
+			welcome();
 		}
 		
 		if(a == 5){//adds meeting notes
@@ -143,45 +148,57 @@ public class ContactStarter {
 			System.out.println("Now please enter the notes you wish to add: ");
 			String newNotes = getInput();
 			newContactManager.addMeetingNotes(iD, newNotes);
+			
+			welcome();
 		}
 	}
 
 	public String getInput(){
 		String str = "";
-		try{
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-			str = bufferedReader.readLine();
-		} catch (IOException ex){
-			ex.printStackTrace();
+		String returnStr = null;
+		while(str == ""){
+			try{
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+				str = bufferedReader.readLine();
+			} catch (IOException ex){
+				ex.printStackTrace();
+			}
+			returnStr = str.toLowerCase();
 		}
-		return str;
+		return returnStr;
 	}
 	
 	public void accessFutureMeeting(){
 		System.out.println("You have selected access future meeting, now please either the ID of the meeting you would like to view, or alternatively enter a contact name or a date(DD/MM/YYYY) to view all associated meetings: ");
 		String str = getInput();
 		
-		if(Character.isDigit(str.charAt(0))){
+		if(Character.isDigit(str.charAt(0)) && str.length() == 10){
+			newContactManager.getFutureMeetingList(newContactManager.getDate(str));
+		} else if(Character.isDigit(str.charAt(0))){
 			int id = getInt(str);
 			newContactManager.getFutureMeeting(id);
-		} else if(str.charAt(2) == ('/')){
-			newContactManager.getFutureMeetingList(newContactManager.getDate(str));
 		} else {
 			newContactManager.getFutureMeetingList(newContactManager.getContact(str));
 		}
+		welcome();
 	}
 	
 	public void accessPastMeeting(){
 		System.out.println("You have selected access past meeting, now please either the ID of the meeting you would like to view, or alternatively enter a contact name to view all associated meetings: ");
 		String str = getInput();
 		
-		if(Character.isDigit(str.charAt(0))){
-			int id = getInt(str);
-			newContactManager.getPastMeeting(id);
-		} else {
-			newContactManager.getPastMeetingList(newContactManager.getContact(str));
+		try{
+			if(Character.isDigit(str.charAt(0))){
+				int id = getInt(str);
+				newContactManager.getPastMeeting(id);
+			
+			} else {
+				newContactManager.getPastMeetingList(newContactManager.getContact(str));
+			}
+		} catch(NumberFormatException ex){
+			System.out.println("that was not an number or a name, please try again.");
 		}
-		
+		welcome();
 	}
 	
 	public int getInt(String input){
