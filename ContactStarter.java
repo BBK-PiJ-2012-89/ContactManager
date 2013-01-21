@@ -42,6 +42,7 @@ public class ContactStarter {
 			str = getInput();
 			
 			if(str.equals("exit")){
+				newContactManager.flush();
 				break;
 			}
 			
@@ -51,9 +52,11 @@ public class ContactStarter {
 			} catch (NumberFormatException ex){
 				System.out.println("That was not an integer! Please try again.");
 			}
+			
 			if(selection > 5 || selection < 1){
 				System.out.println("That was not an option, please try again.");
 				selection = 0;
+				System.out.println("Selection is zero");
 			}
 		}
 
@@ -128,8 +131,10 @@ public class ContactStarter {
 			while(str!= "p" || str!= "f"){
 				if(str.equals("p")){
 					accessPastMeeting();
+					break;
 				} else if(str.equals("f")){
 					accessFutureMeeting();
+					break;
 				} else {
 					System.out.println("That was not an option, please try again.");
 				}
@@ -180,6 +185,7 @@ public class ContactStarter {
 		} else {
 			newContactManager.getFutureMeetingList(newContactManager.getContact(str));
 		}
+		
 		welcome();
 	}
 	

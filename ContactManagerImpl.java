@@ -420,9 +420,27 @@ public class ContactManagerImpl{
 		return returnStr;
 	}
 
+	public void readIn(){
+		String filename = "ContactManager.csv";
+		File file = new File(filename);
+		try{ 
+			BufferedReader in = new BufferedReader(new FileReader(file)); 
+			String line; 
+			while ((line = in.readLine()) != null) { 
+				
+			} 
+			in.close(); 
+			
+		} catch (FileNotFoundException ex) { 
+				System.out.println("File " + file + " does not exist."); 
+		} catch (IOException ex) { 
+			ex.printStackTrace(); 
+		}
+	}
+		
 	public void flush(){
 		
-		String filename = "." + File.separator + "ContactManager.csv";
+		String filename = "ContactManager.csv";
 		File file = new File(filename);
 		PrintWriter out = null;
 		
@@ -439,25 +457,19 @@ public class ContactManagerImpl{
 				for(int i = 0; i < meetingList.size(); i++){
 					out.print(meetingList.get(i).getID());
 					out.print(",");
-					out.println(meetingList.get(i).getDate());
+					out.println(meetingList.get(i).getDateString());
 					out.print(",");
 					Iterator<ContactImpl> it = meetingList.get(i).getContacts().iterator();
-					
-					while(it.getNext() != null){
-						out.print(it.next);
+					while(it.hasNext()){
+						ContactImpl holder = it.next();
+						out.print(holder.getId());
 						out.print(",");
+						}
 				}
-				
 			} catch (IOException ex){
 				ex.printStackTrace();
 			} finally {
-				try { 
-					if (out != null) {
-						out.close();
-					}
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
+				out.close();
 			}
 		} else {
 			try{
