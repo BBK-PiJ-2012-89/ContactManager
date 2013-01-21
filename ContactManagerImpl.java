@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -11,6 +9,10 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.GregorianCalendar;
 import java.text.SimpleDateFormat;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.*;
 
 public class ContactManagerImpl{
 
@@ -418,11 +420,53 @@ public class ContactManagerImpl{
 		return returnStr;
 	}
 
-	/**
-	* Save all data to disk
-	*
-	* This method must be executed when the program is
-	* closed and when/if the user requests it.
-	*/
-	public void flush(){}
+	public void flush(){
+		
+		String filename = "." + File.separator + "ContactManager.csv";
+		File file = new File(filename);
+		PrintWriter out = null;
+		
+		if(file.exists()){
+			try{
+				out = new PrintWriter(file);
+				for(int i = 0; i < contactList.size(); i++){
+					out.print(contactList.get(i).getId());
+					out.print(",");
+					out.print(contactList.get(i).getName());
+					out.print(",");
+					out.println(contactList.get(i).getNotes());
+				}
+				for(int i = 0; i < meetingList.size(); i++){
+					out.print(meetingList.get(i).getID());
+					out.print(",");
+					out.println(meetingList.get(i).getDate());
+					out.print(",");
+					Iterator<ContactImpl> it = meetingList.get(i).getContacts().iterator();
+					
+					while(it.getNext() != null){
+						out.print(it.next);
+						out.print(",");
+				}
+				
+			} catch (IOException ex){
+				ex.printStackTrace();
+			} finally {
+				try { 
+					if (out != null) {
+						out.close();
+					}
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		} else {
+			try{
+				file.createNewFile();
+			} catch (IOException ex){
+				ex.printStackTrace();
+			}
+			
+			flush();
+		}
+	}
 }
