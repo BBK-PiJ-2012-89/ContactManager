@@ -14,8 +14,8 @@ public class ContactStarter {
 
     public void launch() {
     	
+    	newContactManager.readIn();
     	welcome();
-
     }
 
 	public void welcome(){
