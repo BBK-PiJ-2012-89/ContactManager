@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class ContactStarter {
+	String str = "";
 	
 	private ContactManagerImpl newContactManager = new ContactManagerImpl();
 	
@@ -20,8 +21,16 @@ public class ContactStarter {
 
 	public void welcome(){
 		
+		boolean finished = false;
 		
-		String str = "";
+		if(str.equals("exit")){
+			finished = true;
+		}
+		
+		while(!finished){
+		
+		
+		str = "";
 		
 		int selection = 0;
 		
@@ -61,6 +70,7 @@ public class ContactStarter {
 		}
 
 		mainMenu(selection);
+		}
 	}
 
 	public void mainMenu(int a){
