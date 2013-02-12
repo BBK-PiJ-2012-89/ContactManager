@@ -9,32 +9,30 @@ import java.util.HashSet;
 import java.util.GregorianCalendar;
 import java.text.SimpleDateFormat;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.*;
 
-public class ContactManagerImpl {
+public class ContactManagerImpl implements ContactManager {
 
 	private int contactID = 0;
 	private int meetingID = 0;
-	private int pastMeetingID = 0;
 	private int futureCounter = 0;
-	private List<ContactImpl> contactList = new ArrayList<ContactImpl>();
-	private List<MeetingImpl> meetingList = new ArrayList<MeetingImpl>();
+	private List<Contact> contactList = new ArrayList<Contact>();
+	private List<Meeting> meetingList = new ArrayList<Meeting>();
 	private List<PastMeetingImpl> pastMeetingList = new ArrayList<PastMeetingImpl>();
 	private Calendar theCalendar = new GregorianCalendar();
-	private SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+	private SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy kk:mm");
 
 	public ContactManagerImpl() {
-		readIn();
+		readIn(); //Any previous information is loaded into the Contact Manager
 	}
 
 	public void makeMeeting() {
 
-		System.out.println("Is this a future meeting (F), or has it already occured (P): ");
+		System.out
+				.println("Is this a future meeting (F), or has it already occured (P): ");
 		boolean past = true;
 		String pastOrFuture = "";
-		while (!pastOrFuture.equals("p") || !pastOrFuture.equals("f")) {
+		while (!pastOrFuture.equals("p") || !pastOrFuture.equals("f")) {//The user must specify whether a past or future meeting is required
 			pastOrFuture = getInput();
 			if (pastOrFuture.equals("p")) {
 				past = true;
@@ -47,14 +45,14 @@ public class ContactManagerImpl {
 			}
 		}
 
-		Set<ContactImpl> contacts = new HashSet<ContactImpl>();
+		Set<Contact> contacts = new HashSet<Contact>();
 		;
 		String str = null;
 		System.out
 				.println("Begin by entering, one by one, the names contacts who will attend the meeting, when you are finished, type F: ");
 		boolean finished = false;
 
-		while (!finished) {
+		while (!finished) {//The user enters contacts separated by hitting the enter key finishing with f
 			boolean contactExists = false;
 			str = getInput();
 			try {
@@ -81,17 +79,17 @@ public class ContactManagerImpl {
 								+ ", does not appear to be in our database, please check the name and try again or return to the home screen to enter a new contact.");
 			}
 		}
-		System.out.println("Now please enter the date(DD/MM/YYYY): ");
+		System.out.println("Now please enter the date and time(DD/MM/YYYY HH:MM): ");
 		String dateString = getInput();
 		Calendar calHolder = getDate(dateString);
-		
+
 		if (!past) {
-			addFutureMeeting(contacts, calHolder, dateString);
+			addFutureMeeting(contacts, calHolder);
 		} else if (past) {
 			System.out
 					.println("Please now enter any additional notes you may have about this meeting.");
 			String notes = getInput();
-			addNewPastMeeting(contacts, calHolder, notes, dateString);
+			addNewPastMeeting(contacts, calHolder, notes);
 		}
 
 	}
@@ -100,24 +98,29 @@ public class ContactManagerImpl {
 		Calendar cal = Calendar.getInstance();
 		Date newDate = null;
 		Calendar calHolder = Calendar.getInstance();
-		
+
 		try {
 			newDate = df.parse(date);
 			cal.setTime(df.parse(date));
 			calHolder.setTime(newDate);
 		} catch (ParseException e) {
-			System.out.println("That was not the correct date format, please try again");
+			System.out
+					.println("That was not the correct date format, please try again");
 		}
-		
+
 		return calHolder;
 	}
 
-	public List<ContactImpl> getContacts() {
+	public String dateToString(Date date){
+		String dateString = date.toString();
+		return dateString;
+	}
+	
+	public List<Contact> getContacts() {
 		return contactList;
 	}
 
-	public int addFutureMeeting(Set<ContactImpl> contacts, Calendar date,
-			String dateString) {
+	public int addFutureMeeting(Set<Contact> contacts, Calendar date) {
 
 		try {
 			if (date.getTime().before(theCalendar.getTime())) {
@@ -125,32 +128,33 @@ public class ContactManagerImpl {
 				throw new IllegalArgumentException(
 						"The time entered was in the past!");
 			}
-		
 
 			if (date.getTime().after(theCalendar.getTime())) {
 				MeetingImpl newFuture = new FutureMeetingImpl(meetingID, date,
-						contacts, dateString);
-	
+						contacts);
+
 				meetingList.add(newFuture);
-	
+
 				addMeetingtoContacts(contacts, newFuture);
-	
+
 				meetingID++;
 				System.out.println("");
-				System.out.println("Your new meeting has been added, its ID is "
-						+ newFuture.getID());
+				System.out
+						.println("Your new meeting has been added, its ID is "
+								+ newFuture.getID());
 				System.out.println("");
-	
+
 				return newFuture.getID();
 			}
 		} catch (IllegalArgumentException ex) {
-			System.out.println("The date entered was not in the correct format!");
+			System.out
+					.println("The date entered was not in the correct format!");
 		}
 		return 0;
 	}
 
-	private void addMeetingtoContacts(Set<ContactImpl> contacts,
-			MeetingImpl newMeeting) {
+	private void addMeetingtoContacts(Set<Contact> contacts,
+			Meeting newMeeting) {
 
 		ContactImpl[] theContacts = contacts.toArray(new ContactImpl[0]);
 
@@ -159,14 +163,13 @@ public class ContactManagerImpl {
 		}
 	}
 
-	public PastMeetingImpl getPastMeeting(int id) {
+	public PastMeeting getPastMeeting(int id) {
 
-		PastMeetingImpl returner = null;
-
+		PastMeeting returner = null;
 		for (int i = 0; i < pastMeetingList.size(); i++) {
 
 			if (pastMeetingList.get(i).getID() == id) {
-				returner = pastMeetingList.get(i);
+				returner = (PastMeeting) pastMeetingList.get(i);
 			}
 		}
 
@@ -174,10 +177,10 @@ public class ContactManagerImpl {
 			System.out.println("There is no such past meeting");
 			return null;
 		}
-
+		
 		System.out.println("");
 		System.out.println("Meeting: " + returner.getID());
-		System.out.println("Date: " + returner.getDateString());
+		System.out.println((df.format(returner.getDate().getTime())));
 		System.out.print("Attendees: ");
 		printContacts(returner.getContacts());
 		System.out.println("Notes: " + returner.getNotes());
@@ -185,16 +188,16 @@ public class ContactManagerImpl {
 	}
 
 	public FutureMeetingImpl getFutureMeeting(int id) {
-		
+
 		try {
-		FutureMeetingImpl returner = (FutureMeetingImpl) getMeeting(id);	
+			FutureMeetingImpl returner = (FutureMeetingImpl) getMeeting(id);
 			if (returner.getDate().getTime().before(theCalendar.getTime())) {
 				throw new IllegalArgumentException(
 						"The meeting corresponding to the ID that you entered has not yet occurred.");
 			} else {
 				System.out.println("");
 				System.out.println("Meeting: " + returner.getID());
-				System.out.println("Date: " + (returner.getDateString()));
+				System.out.println("Date: " + (df.format(returner.getDate().getTime())));
 				System.out.print("Attendees: ");
 				printContacts(returner.getContacts());
 				return returner;
@@ -203,15 +206,15 @@ public class ContactManagerImpl {
 			System.out.println("That meeting has not yet occurred!");
 		} catch (NullPointerException ex) {
 			System.out.println("The ID entered does not exist!");
-		} catch (ClassCastException ex){
+		} catch (ClassCastException ex) {
 			System.out.println("The meeting requested is in the past");
 		}
-		return null;	
+		return null;
 	}
 
-	private MeetingImpl getMeeting(int id) {
+	public Meeting getMeeting(int id) {
 
-		MeetingImpl returner = null;
+		Meeting returner = null;
 
 		for (int i = 0; i < meetingList.size(); i++) {
 
@@ -222,8 +225,8 @@ public class ContactManagerImpl {
 		return returner;
 	}
 
-	public List<FutureMeetingImpl> getFutureMeetingList(ContactImpl contact) {
-		List<MeetingImpl> futureMeetings = null;
+	public List<Meeting> getFutureMeetingList(Contact contact) {
+		List<Meeting> futureMeetings = null;
 
 		try {
 			futureMeetings = getMeetings(contact);
@@ -244,10 +247,10 @@ public class ContactManagerImpl {
 		if (futureMeetings == null) {
 			return null;
 		} else {
-			List<FutureMeetingImpl> futureReturn = new ArrayList<FutureMeetingImpl>();
+			List<Meeting> futureReturn = new ArrayList<Meeting>();
 
 			for (int i = 0; i < futureMeetings.size(); i++) {
-				FutureMeetingImpl holder = (FutureMeetingImpl) futureMeetings
+				FutureMeeting holder = (FutureMeeting) futureMeetings
 						.get(i);
 				futureReturn.add(holder);
 			}
@@ -257,12 +260,14 @@ public class ContactManagerImpl {
 		}
 	}
 
-	public List<MeetingImpl> getMeetings(ContactImpl contact) {
-		List<MeetingImpl> contactMeetings = null;
+	public List<Meeting> getMeetings(Contact contact) {
+		List<Meeting> contactMeetings = null;
+		
+		ContactImpl theContact = (ContactImpl) contact;
 
-		if (contact.getMeetings() != null) {
+		if (theContact.getMeetings() != null) {
 
-			contactMeetings = contact.getMeetings();
+			contactMeetings = theContact.getMeetings();
 		} else {
 			System.out.println("This contact has no meetings!");
 		}
@@ -270,8 +275,8 @@ public class ContactManagerImpl {
 		return contactMeetings;
 	}
 
-	public List<MeetingImpl> getFutureMeetingList(Calendar date) {
-		List<MeetingImpl> futureReturn = new ArrayList<MeetingImpl>();
+	public List<Meeting> getFutureMeetingList(Calendar date) {
+		List<Meeting> futureReturn = new ArrayList<Meeting>();
 
 		for (int i = 0; i < meetingList.size(); i++) {
 			if (meetingList.get(i).getDate().equals(date)) {
@@ -283,11 +288,11 @@ public class ContactManagerImpl {
 		return futureReturn;
 	}
 
-	public List<PastMeetingImpl> getPastMeetingList(ContactImpl contact)
+	public List<PastMeeting> getPastMeetingList(Contact contact)
 			throws IllegalArgumentException {
 
-		List<MeetingImpl> pastMeetings = getMeetings(contact);
-		List<PastMeetingImpl> pastReturn = new ArrayList<PastMeetingImpl>();
+		List<Meeting> pastMeetings = getMeetings(contact);
+		List<PastMeeting> pastReturn = new ArrayList<PastMeeting>();
 		;
 
 		if (pastMeetings != null) {
@@ -304,7 +309,7 @@ public class ContactManagerImpl {
 			return null;
 		} else {
 			for (int i = 0; i < pastMeetings.size(); i++) {
-				PastMeetingImpl holder = (PastMeetingImpl) pastMeetings.get(i);
+				PastMeeting holder = (PastMeeting) pastMeetings.get(i);
 				pastReturn.add(holder);
 			}
 		}
@@ -313,8 +318,8 @@ public class ContactManagerImpl {
 		return pastReturn;
 	}
 
-	public void addNewPastMeeting(Set<ContactImpl> contacts, Calendar date,
-			String notes, String dateString) throws IllegalArgumentException,
+	public void addNewPastMeeting(Set<Contact> contacts, Calendar date,
+			String notes) throws IllegalArgumentException,
 			NullPointerException {
 
 		try {
@@ -329,20 +334,18 @@ public class ContactManagerImpl {
 
 		if (date.getTime().before(theCalendar.getTime())) {
 
-			MeetingImpl newPast = new PastMeetingImpl(meetingID, date,
-					contacts, notes, dateString);
-			PastMeetingImpl thePast = (PastMeetingImpl) newPast;
+			PastMeeting newPast = new PastMeetingImpl(meetingID, date,
+					contacts, notes);
 			meetingList.add(newPast);
-			pastMeetingList.add(thePast);
+			pastMeetingList.add(newPast);
 
 			addMeetingtoContacts(contacts, newPast);
 
 			System.out.println("");
 			System.out.println("Date: "
-					+ meetingList.get(meetingID).getDateString());
+					+ df.format(meetingList.get(meetingID).getDate().getTime()));
 			System.out.println("ID: " + meetingList.get(meetingID).getID());
-			
-			pastMeetingID++;
+
 			meetingID++;
 		}
 	}
@@ -382,13 +385,13 @@ public class ContactManagerImpl {
 		contactID++;
 	}
 
-	public Set<ContactImpl> getContacts(int... contactIDs) {
+	public Set<Contact> getContacts(int... contactIDs) {
 
-		Set<ContactImpl> returnContacts = new HashSet<ContactImpl>();
+		Set<Contact> returnContacts = new HashSet<Contact>();
 
 		try {
 			for (int id : contactIDs) {
-				ContactImpl contact = contactList.get(id);
+				Contact contact = contactList.get(id);
 				if (contact == null) {
 					throw new IllegalArgumentException("The contact id " + id
 							+ "does not exist.");
@@ -408,9 +411,9 @@ public class ContactManagerImpl {
 
 	}
 
-	public Set<ContactImpl> getContacts(String name)
+	public Set<Contact> getContacts(String name)
 			throws NullPointerException {
-		Set<ContactImpl> returnContacts = new HashSet<ContactImpl>();
+		Set<Contact> returnContacts = new HashSet<Contact>();
 
 		for (int i = 0; i < contactList.size(); i++) {
 			if (contactList.get(i).getName().toLowerCase()
@@ -425,8 +428,8 @@ public class ContactManagerImpl {
 		return returnContacts;
 	}
 
-	public ContactImpl getContact(String name) {
-		ContactImpl foundContact = null;
+	public Contact getContact(String name) {
+		Contact foundContact = null;
 		for (int i = 0; i < contactList.size(); i++) {
 			if (contactList.get(i).getName().equals(name)) {
 				foundContact = contactList.get(i);
@@ -440,11 +443,11 @@ public class ContactManagerImpl {
 		contactID = contactList.size();
 	}
 
-	public void printContacts(Set<ContactImpl> returnContacts) {
+	public void printContacts(Set<Contact> returnContacts) {
 
-		Iterator<ContactImpl> it = returnContacts.iterator();
+		Iterator<Contact> it = returnContacts.iterator();
 		while (it.hasNext()) {
-			ContactImpl holder = it.next();
+			Contact holder = it.next();
 			System.out.print("ID: ");
 			System.out.print(holder.getId());
 			System.out.print(" Name: ");
@@ -455,23 +458,23 @@ public class ContactManagerImpl {
 		}
 	}
 
-	public void printMeetings(List<MeetingImpl> contactMeetings) {
+	public void printMeetings(List<Meeting> contactMeetings) {
 		for (int i = 0; i < contactMeetings.size(); i++) {
 			System.out.println("Meeting ID: " + contactMeetings.get(i).getID());
 			System.out.println("Date: "
-					+ contactMeetings.get(i).getDateString());
+					+ df.format(contactMeetings.get(i).getDate().getTime()));
 			System.out.print("Attendees: ");
 			printContacts(contactMeetings.get(i).getContacts());
 
 		}
 	}
 
-	public void printPastMeetings(List<PastMeetingImpl> contactMeetings) {
+	public void printPastMeetings(List<PastMeeting> contactMeetings) {
 
 		for (int i = 0; i < contactMeetings.size(); i++) {
 			System.out.println("Meeting ID: " + contactMeetings.get(i).getID());
 			System.out.println("Date: "
-					+ contactMeetings.get(i).getDateString());
+					+ df.format(contactMeetings.get(i).getDate().getTime()));
 			System.out.print("Attendees: ");
 			printContacts(contactMeetings.get(i).getContacts());
 			System.out.println("Meeting Notes: "
@@ -497,11 +500,11 @@ public class ContactManagerImpl {
 		String dataRow = "";
 		String filename = "ContactManager.csv";
 		File file = new File(filename);
-		
+
 		try {
 			BufferedReader in = new BufferedReader(new FileReader(file));
 
-			while (!dataRow.equals("Meetings")|| dataRow!= null) {
+			while (!dataRow.equals("Meetings") || dataRow != null) {
 				dataRow = in.readLine();
 
 				if (dataRow.equals("Contacts"))
@@ -512,71 +515,79 @@ public class ContactManagerImpl {
 				String[] dataArray = new String[3];
 				dataArray = dataRow.split(",");
 
-				ContactImpl contactFromMemory = new ContactImpl(
+				Contact contactFromMemory = new ContactImpl(
 						Integer.parseInt(dataArray[0]), dataArray[1],
 						dataArray[2]);
 				contactList.add(contactFromMemory);
 			}
 
-
 			do {
 				String[] contactArray = null;
 				String[] dataArray = null;
 				String[] holder = new String[2];
+				String contactPart;
 				dataRow = in.readLine();
-				
-				if(dataRow == null){
+
+				if (dataRow == null) {
 					break;
-				} else if(dataRow.equals("Meetings")){
+				} else if (dataRow.equals("Meetings")) {
 					dataRow = in.readLine();
 				}
 				holder = dataRow.split(";");
 
 				String meetingPart = holder[0];
-				String contactPart = holder[1];
+				if(holder.length > 1){
+					contactPart = holder[1];
+					contactArray = contactPart.split(",");
+				}
 				dataArray = meetingPart.split(",");
-				contactArray = contactPart.split(",");
-				Set<ContactImpl> savedContacts = new HashSet<ContactImpl>();
-		
+				Set<Contact> savedContacts = new HashSet<Contact>();
+
 				for (int i = 0; i < contactList.size(); i++) {
-					for(int j = 0; j < contactArray.length; j++){
-						if (contactList.get(i).getId() == Integer.parseInt(contactArray[j])) {
+					for (int j = 0; j < contactArray.length; j++) {
+						if (contactList.get(i).getId() == Integer
+								.parseInt(contactArray[j])) {
 							savedContacts.add(contactList.get(i));
 						}
 					}
 				}
-								
-				MeetingImpl meetingFromMemory;
-			
+
+				Meeting meetingFromMemory;
+
 				if (getDate(dataArray[1]).getTime().before(
-						theCalendar.getTime())) { //checks if past meeting and therefore whether or not notes must be added
-					 meetingFromMemory = new PastMeetingImpl(
+						theCalendar.getTime())) { // checks if past meeting and
+													// therefore whether or not
+													// notes must be added
+					meetingFromMemory = new PastMeetingImpl(
 							Integer.parseInt(dataArray[0]),
-							getDate(dataArray[1]), savedContacts, dataArray[2],
-							dataArray[1]);
+							getDate(dataArray[1]), savedContacts, dataArray[2]);
 					meetingList.add(meetingFromMemory);
 					PastMeetingImpl pastMeeting = (PastMeetingImpl) meetingFromMemory;
 					pastMeetingList.add(pastMeeting);
 				} else {
-					 meetingFromMemory = new FutureMeetingImpl(
+					meetingFromMemory = new FutureMeetingImpl(
 							Integer.parseInt(dataArray[0]),
-							getDate(dataArray[1]), savedContacts, dataArray[1]);
+							getDate(dataArray[1]), savedContacts);
 					meetingList.add(meetingFromMemory);
 				}
-				
-				Iterator<ContactImpl> it = meetingFromMemory.getContacts().iterator();
-				while(it.hasNext()){ //The newly loaded meetings are added to the relevant contacts
-					it.next().addMeetings(meetingFromMemory);
+
+				Iterator<Contact> it = meetingFromMemory.getContacts()
+						.iterator();
+				while (it.hasNext()) { 
+					ContactImpl nextContact = (ContactImpl) it.next();
+					nextContact.addMeetings(meetingFromMemory);
 				}
-				
+
 			} while (dataRow != null);
-			
+
 			setID();
 			in.close();
 		} catch (FileNotFoundException ex) {
 			System.out.println("File " + file + " does not exist.");
 		} catch (IOException ex) {
 			ex.printStackTrace();
+		} finally{
+			
 		}
 	}
 
@@ -600,31 +611,36 @@ public class ContactManagerImpl {
 				}
 				out.println("Meetings");
 				for (int i = 0; i < meetingList.size(); i++) {
-					if(meetingList.get(i).getDate().getTime().after(theCalendar.getTime()))
-							{
+					if (meetingList.get(i).getDate().getTime()
+							.after(theCalendar.getTime())) {
+						String dateString = df.format(meetingList.get(i).getDate().getTime());
 						out.print(meetingList.get(i).getID());
 						out.print(",");
-						out.print(meetingList.get(i).getDateString());
-						Iterator<ContactImpl> it = meetingList.get(i).getContacts()
-								.iterator();
-						if(it.hasNext()) out.print(";");
+						out.print(dateString);
+						Iterator<Contact> it = meetingList.get(i)
+								.getContacts().iterator();
+						if (it.hasNext())
+							out.print(";");
 						while (it.hasNext()) {
-							ContactImpl holder = it.next();
+							Contact holder = it.next();
 							out.print(holder.getId());
 							out.print(",");
 						}
-					} else if(meetingList.get(i).getDate().getTime().before(theCalendar.getTime())) {
+					} else if (meetingList.get(i).getDate().getTime()
+							.before(theCalendar.getTime())) {
+						String dateString = df.format(meetingList.get(i).getDate().getTime());
 						out.print(meetingList.get(i).getID());
 						out.print(",");
-						out.print(meetingList.get(i).getDateString());
+						out.print(dateString);
 						out.print(",");
 						out.print(pastMeetingList.get(pastMeetings).getNotes());
 						pastMeetings++;
-						Iterator<ContactImpl> it = meetingList.get(i).getContacts()
-								.iterator();
-						if(it.hasNext()) out.print(";");
+						Iterator<Contact> it = meetingList.get(i)
+								.getContacts().iterator();
+						if (it.hasNext())
+							out.print(";");
 						while (it.hasNext()) {
-							ContactImpl holder = it.next();
+							Contact holder = it.next();
 							out.print(holder.getId());
 							out.print(",");
 						}
@@ -646,4 +662,5 @@ public class ContactManagerImpl {
 			flush();
 		}
 	}
+
 }

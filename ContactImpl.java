@@ -6,7 +6,7 @@ public class ContactImpl implements Contact{
 	private int iD;
 	private String name;
 	private String notes;
-	private List<MeetingImpl> meetings;
+	private List<Meeting> meetings;
 
 	public ContactImpl(int iD, String name, String notes){
 		this.name = name;
@@ -27,23 +27,22 @@ public class ContactImpl implements Contact{
 		return notes;
 	}
 
-	public void addMeetings(MeetingImpl newMeetings){
+	public void addMeetings(Meeting newMeetings){
 
 		if(meetings == null){
-			meetings = new ArrayList<MeetingImpl>();
+			meetings = new ArrayList<Meeting>();
 		}
 
 		meetings.add(newMeetings);
 	}
 
-	public List<MeetingImpl> getMeetings(){
+	public List<Meeting> getMeetings(){
 		return meetings;
 	}
 
 	public void addNotes(String note){
 
-		notes += note;
-		//When adding notes, I should probably include the date and time they were written
+		notes = note;
 
 	}
 }

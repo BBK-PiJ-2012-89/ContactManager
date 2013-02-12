@@ -73,11 +73,11 @@ public interface ContactManager{
 	* Returns the list of past meetings in which this contact has participated
 	*
 	* If there are none, the list will be returned empty. Otherwise,
-	* the list whill be chronologicall sorted and will not contain 
+	* the list will be chronologically sorted and will not contain 
 	* any duplicates.
 	*
 	* @param contact one of the user's contacts
-	* @return the list of future meeitngs sceduled with the contact (maybe empty)
+	* @return the list of future meetings scheduled with the contact (maybe empty)
 	* @throws IllegalArgumentException if the contact does not exist
 	*/
 	List<PastMeeting> getPastMeetingList(Contact contact);
@@ -100,7 +100,7 @@ public interface ContactManager{
 	* This method is used when a future meeting takes place, and is
 	* then converted to a past meeting (with notes).
 	*
-	* It can be also used to add ntoes to a past meeting at a later date.
+	* It can be also used to add notes to a past meeting at a later date.
 	*
 	* @param id the ID of the meeting
 	* @param text messages to be added about the meeting.
@@ -126,7 +126,7 @@ public interface ContactManager{
 	* @return a list containing the contacts that correspond to the IDs.
 	* @throws IllegalArgumentException if any of the IDs does not correspond to a real contact
 	*/
-	Set<Contact> getContacts(int ids);
+	Set<Contact> getContacts(int... ids);
 
 	/**
 	* Returns a list with the contacts whose name contains that string.

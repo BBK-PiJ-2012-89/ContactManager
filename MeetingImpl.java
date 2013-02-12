@@ -12,10 +12,11 @@ public class MeetingImpl implements Meeting{
 	private Calendar date;
 	private Set<Contact> attendees;
 
-	public MeetingImpl(int iD, Calendar date, Set<ContactImpl> attendees){
+	MeetingImpl(int iD, Calendar date, Set<Contact> attendees){
 		this.iD = iD;
 		this.date = date;
-
+		this.attendees = attendees;
+		
 	}
 
 	public int getID(){
@@ -23,10 +24,22 @@ public class MeetingImpl implements Meeting{
 	}
 
 	public Calendar getDate(){
+		
 		return date;
 	}
 
 	public Set<Contact> getContacts(){
 		return attendees;
 	}
+	
+	public int getAttendance(){
+		if(attendees != null){
+			int attendance = attendees.size();
+			return attendance;
+		} else{
+			System.out.println("There are not attendees listed for this meeting!");
+		}
+		return 0;
+	}
+	
 }

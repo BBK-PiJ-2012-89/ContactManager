@@ -5,12 +5,12 @@ import java.util.Calendar;
 *
 *It includes your notes about what happened and what was agreed.
 */
-public class PastMeetingImpl extends MeetingImpl implements Meeting {
+public class PastMeetingImpl extends MeetingImpl implements PastMeeting {
 
 	private String notes;
 
-	public PastMeetingImpl(int iD, Calendar date, Set<ContactImpl> attendees, String notes, String dateString){
-		super(iD, date, attendees, dateString);
+	public PastMeetingImpl(int iD, Calendar date, Set<Contact> attendees, String notes){
+		super(iD, date, attendees);
 		this.notes = notes;
 	}
 	
