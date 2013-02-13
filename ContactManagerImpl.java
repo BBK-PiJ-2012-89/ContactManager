@@ -24,6 +24,28 @@ public class ContactManagerImpl implements ContactManager {
 
 	public ContactManagerImpl() {
 		readIn(); //Any previous information is loaded into the Contact Manager
+		checkMeetings();
+	}
+
+	private void checkMeetings() {
+		Meeting holder = null;
+				
+		if(!pastMeetingList.isEmpty()){
+			holder = pastMeetingList.get(0);
+		}
+		
+		System.out.println("There are past meetings");
+		
+		for(int i = 0; i < pastMeetingList.size(); i++){
+			if(holder.getDate().getTime().after(theCalendar.getTime())){
+				PastMeetingImpl newPast = (PastMeetingImpl) holder;
+				
+				System.out.println("The Meeting " + newPast.getID() + " has now passed, please add notes:");
+				String notes = getInput();
+				addMeetingNotes(newPast.getID(), notes);
+			}
+		}
+		
 	}
 
 	public void makeMeeting() {
@@ -542,16 +564,17 @@ public class ContactManagerImpl implements ContactManager {
 				}
 				dataArray = meetingPart.split(",");
 				Set<Contact> savedContacts = new HashSet<Contact>();
-
-				for (int i = 0; i < contactList.size(); i++) {
-					for (int j = 0; j < contactArray.length; j++) {
-						if (contactList.get(i).getId() == Integer
-								.parseInt(contactArray[j])) {
-							savedContacts.add(contactList.get(i));
+				
+				if(contactList!=null && contactArray!=null){
+					for (int i = 0; i < contactList.size(); i++) {
+						for (int j = 0; j < contactArray.length; j++) {
+							if (contactList.get(i).getId() == Integer
+									.parseInt(contactArray[j])) {
+								savedContacts.add(contactList.get(i));
+							}
 						}
 					}
 				}
-
 				Meeting meetingFromMemory;
 
 				if (getDate(dataArray[1]).getTime().before(
