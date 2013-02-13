@@ -187,10 +187,10 @@ public class ContactManagerImpl implements ContactManager {
 		return returner;
 	}
 
-	public FutureMeetingImpl getFutureMeeting(int id) {
+	public FutureMeeting getFutureMeeting(int id) {
 
 		try {
-			FutureMeetingImpl returner = (FutureMeetingImpl) getMeeting(id);
+			FutureMeeting returner = (FutureMeeting) getMeeting(id);
 			if (returner.getDate().getTime().before(theCalendar.getTime())) {
 				throw new IllegalArgumentException(
 						"The meeting corresponding to the ID that you entered has not yet occurred.");
@@ -309,7 +309,7 @@ public class ContactManagerImpl implements ContactManager {
 			return null;
 		} else {
 			for (int i = 0; i < pastMeetings.size(); i++) {
-				PastMeeting holder = (PastMeeting) pastMeetings.get(i);
+				PastMeetingImpl holder = (PastMeetingImpl) pastMeetings.get(i);
 				pastReturn.add(holder);
 			}
 		}
@@ -334,7 +334,7 @@ public class ContactManagerImpl implements ContactManager {
 
 		if (date.getTime().before(theCalendar.getTime())) {
 
-			PastMeeting newPast = new PastMeetingImpl(meetingID, date,
+			PastMeetingImpl newPast = new PastMeetingImpl(meetingID, date,
 					contacts, notes);
 			meetingList.add(newPast);
 			pastMeetingList.add(newPast);

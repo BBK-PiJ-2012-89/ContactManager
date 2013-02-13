@@ -187,7 +187,7 @@ public class ContactStarter {
 				.println("You have selected access future meeting, now please either the ID of the meeting you would like to view, or alternatively enter a contact name or a date(DD/MM/YYYY) to view all associated meetings: ");
 		String str = getInput();
 
-		if (Character.isDigit(str.charAt(0)) && str.length() == 10) {
+		if (Character.isDigit(str.charAt(0)) && str.length() == 16) {
 			newContactManager.getFutureMeetingList(newContactManager
 					.getDate(str));
 		} else if (Character.isDigit(str.charAt(0))) {
