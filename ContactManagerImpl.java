@@ -26,6 +26,10 @@ public class ContactManagerImpl implements ContactManager {
 		readIn(); //Any previous information is loaded into the Contact Manager
 		checkMeetings();
 	}
+	
+	public int getContactListSize(){
+		return contactID;
+	}
 
 	private void checkMeetings() {
 		Meeting holder = null;
